@@ -1,0 +1,87 @@
+import { AppDataSource } from "../data-source";
+import { VacationRequest, RequestStatus } from "../entities/VacationRequest";
+import { User } from "../entities/User";
+
+export interface CreateRequestDto {
+  userId: number;
+  startDate: string;
+  endDate: string;
+  reason?: string;
+}
+
+export class VacationRequestService {
+  private get requestRepo() {
+    return AppDataSource.getRepository(VacationRequest);
+  }
+
+  private get userRepo() {
+    return AppDataSource.getRepository(User);
+  }
+
+  async createRequest(dto: CreateRequestDto): Promise<VacationRequest> {
+    const { userId, startDate, endDate, reason } = dto;
+
+    if (!userId) throw { status: 400, message: "userId is required" };
+    if (!startDate) throw { status: 400, message: "startDate is required" };
+    if (!endDate) throw { status: 400, message: "endDate is required" };
+
+    if (new Date(endDate) < new Date(startDate)) {
+      throw { status: 400, message: "endDate must be same as or after startDate" };
+    }
+
+    const user = await this.userRepo.findOneBy({ id: Number(userId) });
+    if (!user) throw { status: 404, message: "User not found" };
+
+    const request = this.requestRepo.create({
+      user_id: Number(userId),
+      start_date: startDate,
+      end_date: endDate,
+      reason: reason || "",
+      status: RequestStatus.PENDING,
+    });
+
+    return this.requestRepo.save(request);
+  }
+
+  async getRequestsByUser(userId: number): Promise<VacationRequest[]> {
+    return this.requestRepo.find({
+      where: { user_id: Number(userId) },
+      order: { created_at: "DESC" },
+    });
+  }
+
+  async getAllRequests(status?: string): Promise<VacationRequest[]> {
+    const validStatuses = ["Pending", "Approved", "Rejected"];
+    const where: Partial<VacationRequest> = {};
+    if (status && validStatuses.includes(status)) {
+      where.status = status as RequestStatus;
+    }
+
+    return this.requestRepo.find({
+      where,
+      relations: ["user"],
+      order: { created_at: "DESC" },
+    });
+  }
+
+  async approveRequest(id: number): Promise<VacationRequest> {
+    const request = await this.requestRepo.findOneBy({ id: Number(id) });
+    if (!request) throw { status: 404, message: "Vacation request not found" };
+
+    request.status = RequestStatus.APPROVED;
+    return this.requestRepo.save(request);
+  }
+
+  async rejectRequest(id: number, comments: string): Promise<VacationRequest> {
+    if (!comments || !comments.trim()) {
+      throw { status: 400, message: "comments is required when rejecting a request" };
+    }
+
+    const request = await this.requestRepo.findOneBy({ id: Number(id) });
+    if (!request) throw { status: 404, message: "Vacation request not found" };
+
+    request.status = RequestStatus.REJECTED;
+    request.comments = comments.trim();
+    return this.requestRepo.save(request);
+  }
+}
