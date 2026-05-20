@@ -12,14 +12,15 @@ A full-stack web application for managing employee vacation requests. Employees 
 4. [Project Structure](#project-structure)
 5. [Database Schema](#database-schema)
 6. [API Reference](#api-reference)
-7. [Frontend Pages & Components](#frontend-pages--components)
-8. [State Management & Services](#state-management--services)
-9. [Environment Variables](#environment-variables)
-10. [Local Setup](#local-setup)
-11. [Seed Data](#seed-data)
-12. [Testing](#testing)
-13. [Design Decisions](#design-decisions)
-14. [Known Limitations](#known-limitations)
+7. [Endpoint Implementation](#endpoint-implementation)
+8. [Frontend Pages & Components](#frontend-pages--components)
+9. [State Management & Services](#state-management--services)
+10. [Environment Variables](#environment-variables)
+11. [Local Setup](#local-setup)
+12. [Seed Data](#seed-data)
+13. [Testing](#testing)
+14. [Design Decisions](#design-decisions)
+15. [Known Limitations](#known-limitations)
 
 ---
 
@@ -398,6 +399,122 @@ Returns `{ "status": "ok" }`. Used to verify the server is running.
 
 ---
 
+## Endpoint Implementation
+
+Every endpoint follows the same four-layer chain:
+
+```
+Route definition  →  Controller handler  →  Service (validation + logic)  →  Repository (DB)
+```
+
+All controller handlers are wrapped in `asyncHandler` so any thrown error propagates automatically to `errorHandler` — no try/catch in individual handlers.
+
+---
+
+### POST /api/vacation-requests — Submit a request
+
+| Layer | File | What happens |
+|---|---|---|
+| Route | `routes/vacationRequest.routes.ts` | `router.post("/", ctrl.createRequest)` |
+| Controller | `controllers/vacationRequest.controller.ts` | Calls `service.createRequest(req.body)`, returns 201 |
+| Validator | `validators/vacationRequest.validator.ts` | `validateCreateRequest` — checks userId, startDate, endDate present; endDate ≥ startDate |
+| Service | `services/vacationRequest.service.ts` | Verifies user exists (404 if not), builds entity, saves |
+| Repository | `repositories/typeorm/TypeOrmVacationRequestRepository.ts` | `repo.save(entity)` via `TypeOrmBaseRepository` |
+
+---
+
+### GET /api/vacation-requests/user/:userId — Requester view
+
+| Layer | File | What happens |
+|---|---|---|
+| Route | `routes/vacationRequest.routes.ts` | `router.get("/user/:userId", ctrl.getRequestsByUser)` |
+| Controller | `controllers/vacationRequest.controller.ts` | `parseInt(req.params.userId)` → service |
+| Service | `services/vacationRequest.service.ts` | Delegates directly to repository |
+| Repository | `repositories/typeorm/TypeOrmVacationRequestRepository.ts` | `repo.find({ where: { user_id }, order: { created_at: "DESC" } })` |
+
+---
+
+### GET /api/vacation-requests — Validator view (all requests)
+
+| Layer | File | What happens |
+|---|---|---|
+| Route | `routes/vacationRequest.routes.ts` | `router.get("/", ctrl.getAllRequests)` |
+| Controller | `controllers/vacationRequest.controller.ts` | Passes `req.query.status` to service |
+| Service | `services/vacationRequest.service.ts` | Validates status value — if unknown, ignores and returns all |
+| Repository | `repositories/typeorm/TypeOrmVacationRequestRepository.ts` | `repo.find({ where: { status? }, relations: ["user"], order: { created_at: "DESC" } })` — includes employee name |
+
+---
+
+### PATCH /api/vacation-requests/:id/approve — Approve
+
+| Layer | File | What happens |
+|---|---|---|
+| Route | `routes/vacationRequest.routes.ts` | `router.patch("/:id/approve", ctrl.approveRequest)` |
+| Controller | `controllers/vacationRequest.controller.ts` | Parses `req.params.id` → service |
+| Service | `services/vacationRequest.service.ts` | Fetches request (404 if missing), sets `status = "Approved"`, saves |
+| Repository | `repositories/typeorm/TypeOrmBaseRepository.ts` | `repo.save(entity)` |
+
+---
+
+### PATCH /api/vacation-requests/:id/reject — Reject with comment
+
+| Layer | File | What happens |
+|---|---|---|
+| Route | `routes/vacationRequest.routes.ts` | `router.patch("/:id/reject", ctrl.rejectRequest)` |
+| Controller | `controllers/vacationRequest.controller.ts` | Passes `req.params.id` + `req.body.comments` |
+| Validator | `validators/vacationRequest.validator.ts` | `validateReject` — throws 400 if `comments` is missing or whitespace-only |
+| Service | `services/vacationRequest.service.ts` | Fetches request (404 if missing), sets `status = "Rejected"` + `comments = comments.trim()`, saves |
+| Repository | `repositories/typeorm/TypeOrmBaseRepository.ts` | `repo.save(entity)` |
+
+---
+
+### Input Validation
+
+All validation lives in `src/validators/` as **pure functions** — no database access, no side effects. They throw `{ status, message }` objects which `errorHandler` converts to the correct HTTP response.
+
+| Function | Validates |
+|---|---|
+| `validateCreateRequest` | userId present, both dates present, endDate ≥ startDate |
+| `validateUpdateRequest` | status is Pending, both dates present, endDate ≥ startDate |
+| `validateReject` | comments is non-empty after trimming |
+| `validateDeleteRequest` | status is Pending |
+| `validateLogin` | name and password both present |
+| `validateRegister` | name present, role present, password ≥ 4 characters |
+
+---
+
+### Error Handling
+
+Two components work together:
+
+**`asyncHandler`** (`utils/asyncHandler.ts`) — a one-line wrapper applied to every controller method:
+```ts
+(req, res, next) => fn(req, res, next).catch(next)
+```
+Any error thrown anywhere in the async chain (validator, service, repository) is forwarded to Express's `next(err)` automatically — no try/catch boilerplate in controllers.
+
+**`errorHandler`** (`middleware/errorHandler.ts`) — the central Express error middleware:
+```ts
+const status  = err.status  || 500;
+const message = err.message || "Internal Server Error";
+res.status(status).json({ error: message });
+```
+Every error in the system produces a consistent `{ "error": "..." }` JSON response with the correct HTTP status code.
+
+---
+
+### RESTful Best Practices
+
+| Practice | How it is applied |
+|---|---|
+| Correct HTTP verbs | `POST` create, `GET` read, `PATCH` partial update, `DELETE` remove |
+| Meaningful status codes | 201 created, 204 no content, 400 bad request, 401 unauthorised, 404 not found, 409 conflict |
+| Hierarchical resource paths | `/vacation-requests/:id/approve` — action as a sub-resource |
+| Consistent error shape | Always `{ "error": "message string" }` |
+| Query params for filtering | `?status=Pending` instead of a separate endpoint |
+
+---
+
 ## Frontend Pages & Components
 
 ### Pages
@@ -646,27 +763,118 @@ The only uncovered branch is `api.ts` line 4: the `import.meta.env.VITE_API_BASE
 
 ## Design Decisions
 
-**Cancel = hard delete.** Cancelled requests are permanently removed from the database. There is no "Cancelled" status and no restore flow. This keeps the state machine simple — only three statuses exist.
+### Backend
 
-**`DB_SYNC` env-controlled.** `synchronize` is driven by `DB_SYNC=true` in `.env`. Set to `false` in staging/production and use TypeORM migrations instead.
+---
 
-**No JWT.** The user object is stored directly via `IStorage` after login. Acceptable for a demo; in production, use a signed JWT or a server-side session with a secure `httpOnly` cookie.
+**Repository pattern with a generic base interface.**
+`IRepository<T, ID>` defines the minimal contract every repository must fulfil: `findById`, `save`, `remove`, `create`. Domain interfaces (`IUserRepository`, `IVacationRequestRepository`) extend it and add query-specific methods. `TypeOrmBaseRepository<T>` is an abstract class that implements the base contract using TypeORM; concrete repositories extend it and only add the methods their domain needs. Services only ever depend on the interface — they never import TypeORM or any concrete class. Swapping the database means writing new classes in `repositories/typeorm/` and re-registering them in `container.ts`. Nothing else changes.
 
-**Single source of truth for routes and role strings.** All route paths live in the `ROUTES` constant in `constants/index.ts`. All role strings live in the `UserRole` enum. No string literals are scattered through components.
+---
 
-**`password_hash` is `select: false`.** TypeORM never includes the column in standard repository queries. `TypeOrmUserRepository.findByNameWithPassword` uses a QueryBuilder with `.addSelect("u.password_hash")` only when needed for bcrypt comparison.
+**Dependency injection via `container.ts`.**
+`createContainer(dataSource)` is the single file that wires all repositories into services. `app.ts` calls it once on startup and passes the results to route factory functions. No service, controller, or route file imports a concrete implementation directly — they all receive their dependencies through their constructor or factory parameter. This makes unit testing trivial: inject a plain mock object, no module patching needed.
 
-**Repository pattern with generic base.** `IRepository<T>` defines the minimal contract (findById, save, remove, create). Domain interfaces extend it with query-specific methods. `TypeOrmBaseRepository<T>` provides one TypeORM implementation of the base. Swapping databases requires only new classes implementing the domain interfaces — services and controllers are untouched.
+```ts
+// container.ts — the only place concrete classes appear
+const userRepo     = new TypeOrmUserRepository(dataSource);
+const vacationRepo = new TypeOrmVacationRequestRepository(dataSource);
+const authService  = new AuthService(userRepo);
+const vacationService = new VacationRequestService(vacationRepo, userRepo);
+```
 
-**Dependency injection via `container.ts`.** All wiring happens in one file. No service, controller, or route imports a concrete implementation directly.
+---
 
-**Generic `asyncHandler`.** Eliminates the try/catch boilerplate from every controller method. Any thrown `{ status, message }` object flows to the centralised `errorHandler` middleware.
+**Validators as a dedicated pure-function layer.**
+All input validation lives in `src/validators/` as plain functions that take primitive arguments and either return void or throw `{ status, message }`. They have no imports of TypeORM, Express, or any service — they cannot produce side effects. This gives services a single responsibility (orchestration), keeps validation logic independently testable, and makes the rules easy to locate and change.
 
-**Injected storage on the frontend.** `createAuthService(storage: IStorage)` accepts any storage implementation. The production singleton uses `LocalStorageAdapter`; tests inject a plain mock object — no `localStorage` stubbing needed.
+---
 
-**Role-aware navigation.** The header shows only the link relevant to the current user's role, plus a "Switch to [other role]" button that logs out and redirects to `/login`.
+**Factory functions for controllers and routes instead of classes.**
+Controllers and routers are created by factory functions (`createVacationRequestController(service)`, `createVacationRequestRouter(service)`) that close over their dependencies. This avoids the `this`-binding pitfalls of class methods passed as Express handlers, keeps the code functional and predictable, and makes dependency passing explicit without needing a framework.
 
-**Background decoration is a fixed layer at `z-index: 0`.** All page content sits at `z-index: 1` (via `.main-content`) so the icons are always behind interactive elements.
+---
+
+**Generic `asyncHandler` wrapper.**
+A one-line utility wraps every controller method:
+```ts
+(req, res, next) => fn(req, res, next).catch(next)
+```
+Any error thrown anywhere in the async chain — validator, service, or repository — is forwarded to `next(err)` automatically. No try/catch appears in any controller. The central `errorHandler` middleware then converts every `{ status, message }` object into the correct HTTP response.
+
+---
+
+**Centralised `errorHandler` middleware.**
+All errors in the system flow to one place. If the thrown object has a `status` field it is used; otherwise the response is 500. If it has a `message` field it is used; otherwise the response is `"Internal Server Error"`. The response shape is always `{ "error": "..." }` — clients never receive an inconsistent error format.
+
+---
+
+**`password_hash` column marked `select: false`.**
+TypeORM excludes the column from every standard `find*` query automatically. Only `TypeOrmUserRepository.findByNameWithPassword` opts back in using a QueryBuilder with `.addSelect("u.password_hash")`, and only for bcrypt comparison during login. After comparison the hash is stripped from the returned object via destructuring before the user is sent to the client:
+```ts
+const { password_hash: _, ...safe } = user;
+return safe;
+```
+This means the hash is never accidentally leaked through any endpoint.
+
+---
+
+**Env-driven DataSource configuration.**
+Every TypeORM connection parameter — host, port, username, password, database name, `synchronize`, `logging` — is read from environment variables with safe fallback defaults. `synchronize: process.env.DB_SYNC === "true"` means schema sync is `false` by default unless explicitly enabled. In development set `DB_SYNC=true` in `.env`; in production leave it unset and use migrations.
+
+---
+
+**Cancel = hard delete, no "Cancelled" status.**
+`DELETE /api/vacation-requests/:id` permanently removes the row. The status enum has exactly three values: `Pending`, `Approved`, `Rejected`. Adding a fourth "Cancelled" status would complicate the validator view (should cancelled requests appear?), the filter bar, and future queries. A hard delete keeps the state machine simple and the data clean.
+
+---
+
+**Invalid status query param is silently ignored.**
+`GET /api/vacation-requests?status=unknown` returns all requests instead of a 400 error. The service checks whether the value is a member of `RequestStatus` — if not, it passes `undefined` to the repository and gets all rows. This prevents a broken filter from disrupting the validator's workflow.
+
+---
+
+**Enum columns in PostgreSQL, not varchar.**
+Both `users.role` and `vacation_requests.status` use `type: "enum"` in TypeORM, which creates a native PostgreSQL `ENUM` type. The database itself rejects any value outside the defined set — data integrity is enforced at the storage layer, not only in application code.
+
+---
+
+### Frontend
+
+---
+
+**`IStorage` abstraction for browser storage.**
+`createAuthService(storage: IStorage)` accepts any object implementing `get`, `set`, `remove`, `has`. The production singleton uses `LocalStorageAdapter`; unit tests inject a plain in-memory object. No `localStorage` stubbing, no `jsdom` config required. Switching to `sessionStorage` in the future is a one-line change in `services/auth.ts`.
+
+---
+
+**`useAuth` as a module-level reactive singleton.**
+The `ref<AuthUser | null>` lives at module scope — not inside the composable function. Every component that calls `useAuth()` receives the same reactive reference. There is no global store (Pinia/Vuex), no prop drilling, and no event bus. The session state is initialised from `localStorage` once when the module first loads, and all components stay in sync automatically.
+
+---
+
+**Single source of truth for all constants.**
+`src/constants/index.ts` defines every string that would otherwise be hardcoded: `UserRole`, `RequestStatus`, `ROUTES`, `STATUS_FILTER_OPTIONS`, and `roleToRoute()`. No component contains a raw string like `"/requester"` or `"Pending"`. If a route path or status label ever changes, it changes in one place.
+
+---
+
+**Router guards enforce role-based access.**
+`router/index.ts` runs a `beforeEach` guard on every navigation. Unauthenticated users are redirected to `/login`. A Requester attempting to visit `/validator` is redirected to `/requester`, and vice versa. This prevents accidental cross-role access without server-side enforcement.
+
+---
+
+**Role-aware header navigation.**
+The header shows only the dashboard link relevant to the current user's role. A "Switch to [other role]" button logs the user out and sends them back to `/login` to sign in with a different account. There is no in-session role switch — a new login is required, which keeps the session state unambiguous.
+
+---
+
+**Client-side validation mirrors server-side validation.**
+The form validates that both dates are present and that endDate ≥ startDate before making any API call. The `endDate` input's `min` attribute is bound to the selected `startDate`, so the browser's date picker also prevents invalid selections. Server-side validators enforce the same rules independently — a malformed request from outside the UI is still rejected.
+
+---
+
+**Background decoration isolated at `z-index: 0`.**
+`VacationDeco` is `position: fixed; z-index: 0; pointer-events: none`. All page content wrappers (`.main-content`, `.hp`) sit at `z-index: 1`. This ensures the decorative icons are always rendered behind every interactive element and can never intercept clicks, regardless of the layout of individual pages.
 
 ---
 
