@@ -6,10 +6,9 @@ export enum UserRole {
 
 // ── Request statuses ─────────────────────────────────
 export enum RequestStatus {
-  PENDING   = "Pending",
-  APPROVED  = "Approved",
-  REJECTED  = "Rejected",
-  CANCELLED = "Cancelled",
+  PENDING  = "Pending",
+  APPROVED = "Approved",
+  REJECTED = "Rejected",
 }
 
 // Filter options for the validator view (includes "All" sentinel)
@@ -18,7 +17,6 @@ export const STATUS_FILTER_OPTIONS = [
   RequestStatus.PENDING,
   RequestStatus.APPROVED,
   RequestStatus.REJECTED,
-  RequestStatus.CANCELLED,
 ] as const;
 
 export type StatusFilterOption = typeof STATUS_FILTER_OPTIONS[number];

@@ -72,15 +72,15 @@ export const approveRequest = async (
   }
 };
 
-export const cancelRequest = async (
+export const deleteRequest = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
     const id = parseInt(req.params.id, 10);
-    const result = await service.cancelRequest(id);
-    res.json(result);
+    await service.deleteRequest(id);
+    res.status(204).send();
   } catch (err) {
     next(err);
   }

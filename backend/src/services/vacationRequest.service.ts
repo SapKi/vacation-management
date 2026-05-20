@@ -98,14 +98,13 @@ export class VacationRequestService {
     return this.requestRepo.save(request);
   }
 
-  async cancelRequest(id: number): Promise<VacationRequest> {
+  async deleteRequest(id: number): Promise<void> {
     const request = await this.requestRepo.findOneBy({ id: Number(id) });
     if (!request) throw { status: 404, message: "Vacation request not found" };
     if (request.status !== RequestStatus.PENDING) {
       throw { status: 400, message: "Only Pending requests can be cancelled" };
     }
-    request.status = RequestStatus.CANCELLED;
-    return this.requestRepo.save(request);
+    await this.requestRepo.remove(request);
   }
 
   async rejectRequest(id: number, comments: string): Promise<VacationRequest> {

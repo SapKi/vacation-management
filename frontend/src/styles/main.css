@@ -245,8 +245,7 @@ body {
 
 .badge-pending  { background: var(--warning-bg);  color: var(--warning); border: 1px solid var(--warning-border); }
 .badge-approved { background: var(--success-bg);  color: var(--success); border: 1px solid var(--success-border); }
-.badge-rejected   { background: var(--danger-bg);  color: var(--danger);  border: 1px solid var(--danger-border); }
-.badge-cancelled  { background: #f1f5f9; color: #64748b; border: 1px solid #cbd5e1; }
+.badge-rejected { background: var(--danger-bg); color: var(--danger); border: 1px solid var(--danger-border); }
 
 /* ── Form ──────────────────────────────────────────── */
 .form-group { margin-bottom: 1.1rem; }

@@ -7,22 +7,20 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import { Clock, CheckCircle, XCircle, Ban } from "lucide-vue-next";
+import { Clock, CheckCircle, XCircle } from "lucide-vue-next";
 import { RequestStatus } from "../constants";
 
 const props = defineProps<{ status: RequestStatus }>();
 
 const badgeClass = computed(() => ({
-  [RequestStatus.PENDING]:   "badge-pending",
-  [RequestStatus.APPROVED]:  "badge-approved",
-  [RequestStatus.REJECTED]:  "badge-rejected",
-  [RequestStatus.CANCELLED]: "badge-cancelled",
+  [RequestStatus.PENDING]:  "badge-pending",
+  [RequestStatus.APPROVED]: "badge-approved",
+  [RequestStatus.REJECTED]: "badge-rejected",
 }[props.status]));
 
 const icon = computed(() => ({
-  [RequestStatus.PENDING]:   Clock,
-  [RequestStatus.APPROVED]:  CheckCircle,
-  [RequestStatus.REJECTED]:  XCircle,
-  [RequestStatus.CANCELLED]: Ban,
+  [RequestStatus.PENDING]:  Clock,
+  [RequestStatus.APPROVED]: CheckCircle,
+  [RequestStatus.REJECTED]: XCircle,
 }[props.status]));
 </script>

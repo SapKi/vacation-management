@@ -40,7 +40,7 @@ export const vacationRequestsApi = {
   },
 
   cancel(id: number) {
-    return api.patch<VacationRequest>(`/vacation-requests/${id}/cancel`);
+    return api.delete(`/vacation-requests/${id}`);
   },
 
   approve(id: number) {
