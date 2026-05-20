@@ -1,57 +1,62 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
-
-// Must stub localStorage before importing authService
-const storage: Record<string, string> = {};
-vi.stubGlobal("localStorage", {
-  getItem:    (k: string) => storage[k] ?? null,
-  setItem:    (k: string, v: string) => { storage[k] = v; },
-  removeItem: (k: string) => { delete storage[k]; },
-  clear:      () => { Object.keys(storage).forEach(k => delete storage[k]); },
-});
-
-import { authService } from "./auth";
+import { describe, it, expect, beforeEach } from "vitest";
+import { IStorage } from "../storage/IStorage";
+import { createAuthService } from "./auth";
 import { UserRole } from "../constants";
 
 const fakeUser = { id: 1, name: "Alice", role: UserRole.REQUESTER };
 
-beforeEach(() => {
-  localStorage.clear();
-});
+function makeMockStorage(): IStorage & { store: Record<string, unknown> } {
+  const store: Record<string, unknown> = {};
+  return {
+    store,
+    get:    <T>(key: string) => (key in store ? (store[key] as T) : null),
+    set:    <T>(key: string, value: T) => { store[key] = value; },
+    remove: (key: string) => { delete store[key]; },
+    has:    (key: string) => key in store,
+  };
+}
 
-describe("authService.save / get / clear / isLoggedIn", () => {
-  it("save persists user to localStorage", () => {
-    authService.save(fakeUser);
-    expect(localStorage.getItem("vm_user")).not.toBeNull();
+describe("authService (injected storage)", () => {
+  let storage: ReturnType<typeof makeMockStorage>;
+  let service: ReturnType<typeof createAuthService>;
+
+  beforeEach(() => {
+    storage = makeMockStorage();
+    service = createAuthService(storage);
+  });
+
+  it("save persists user to storage", () => {
+    service.save(fakeUser);
+    expect(storage.has("vm_user")).toBe(true);
   });
 
   it("get returns the saved user", () => {
-    authService.save(fakeUser);
-    const result = authService.get();
-    expect(result).toEqual(fakeUser);
+    service.save(fakeUser);
+    expect(service.get()).toEqual(fakeUser);
   });
 
   it("get returns null when nothing is stored", () => {
-    expect(authService.get()).toBeNull();
+    expect(service.get()).toBeNull();
   });
 
   it("clear removes the stored user", () => {
-    authService.save(fakeUser);
-    authService.clear();
-    expect(authService.get()).toBeNull();
+    service.save(fakeUser);
+    service.clear();
+    expect(service.get()).toBeNull();
   });
 
   it("isLoggedIn returns true when user is stored", () => {
-    authService.save(fakeUser);
-    expect(authService.isLoggedIn()).toBe(true);
+    service.save(fakeUser);
+    expect(service.isLoggedIn()).toBe(true);
   });
 
   it("isLoggedIn returns false when nothing is stored", () => {
-    expect(authService.isLoggedIn()).toBe(false);
+    expect(service.isLoggedIn()).toBe(false);
   });
 
   it("isLoggedIn returns false after clear", () => {
-    authService.save(fakeUser);
-    authService.clear();
-    expect(authService.isLoggedIn()).toBe(false);
+    service.save(fakeUser);
+    service.clear();
+    expect(service.isLoggedIn()).toBe(false);
   });
 });

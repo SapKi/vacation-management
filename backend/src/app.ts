@@ -1,9 +1,11 @@
 import "reflect-metadata";
 import express from "express";
 import cors from "cors";
-import vacationRequestRoutes from "./routes/vacationRequest.routes";
-import userRoutes from "./routes/user.routes";
-import authRoutes from "./routes/auth.routes";
+import { AppDataSource } from "./data-source";
+import { createContainer } from "./container";
+import { createAuthRouter } from "./routes/auth.routes";
+import { createVacationRequestRouter } from "./routes/vacationRequest.routes";
+import { createUserRouter } from "./routes/user.routes";
 import { errorHandler } from "./middleware/errorHandler";
 
 const app = express();
@@ -11,13 +13,13 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.use("/api/auth", authRoutes);
-app.use("/api/vacation-requests", vacationRequestRoutes);
-app.use("/api/users", userRoutes);
+const { authService, vacationService, userRepo } = createContainer(AppDataSource);
 
-app.get("/api/health", (_req, res) => {
-  res.json({ status: "ok" });
-});
+app.use("/api/auth",              createAuthRouter(authService));
+app.use("/api/vacation-requests", createVacationRequestRouter(vacationService));
+app.use("/api/users",             createUserRouter(userRepo));
+
+app.get("/api/health", (_req, res) => res.json({ status: "ok" }));
 
 app.use(errorHandler);
 

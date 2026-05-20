@@ -1,24 +1,15 @@
 import * as bcrypt from "bcryptjs";
-import { AppDataSource } from "../data-source";
-import { User, UserRole } from "../entities/User";
+import { UserRole } from "../entities/User";
+import { IUserRepository } from "../repositories/IUserRepository";
+import { validateLogin, validateRegister } from "../validators/auth.validator";
 
 export class AuthService {
-  private get repo() {
-    return AppDataSource.getRepository(User);
-  }
+  constructor(private readonly userRepo: IUserRepository) {}
 
-  async login(name: string, password: string): Promise<Omit<User, "password_hash">> {
-    if (!name?.trim() || !password) {
-      throw { status: 400, message: "Name and password are required" };
-    }
+  async login(name: string, password: string) {
+    validateLogin(name, password);
 
-    // password_hash is select:false — must be explicitly selected
-    const user = await this.repo
-      .createQueryBuilder("u")
-      .addSelect("u.password_hash")
-      .where("u.name = :name", { name: name.trim() })
-      .getOne();
-
+    const user = await this.userRepo.findByNameWithPassword(name);
     if (!user || !(await bcrypt.compare(password, user.password_hash))) {
       throw { status: 401, message: "Invalid name or password" };
     }
@@ -27,22 +18,20 @@ export class AuthService {
     return safe;
   }
 
-  async register(name: string, role: UserRole, password: string): Promise<Omit<User, "password_hash">> {
-    if (!name?.trim())           throw { status: 400, message: "Name is required" };
-    if (!role)                   throw { status: 400, message: "Role is required" };
-    if (!password || password.length < 4)
-      throw { status: 400, message: "Password must be at least 4 characters" };
+  async register(name: string, role: UserRole, password: string) {
+    validateRegister(name, role, password);
 
-    const existing = await this.repo.findOneBy({ name: name.trim() });
-    if (existing)                throw { status: 409, message: "An account with that name already exists" };
+    if (await this.userRepo.existsByName(name)) {
+      throw { status: 409, message: "An account with that name already exists" };
+    }
 
-    const user = this.repo.create({
+    const user = this.userRepo.create({
       name: name.trim(),
       role,
       password_hash: await bcrypt.hash(password, 10),
     });
 
-    const saved = await this.repo.save(user);
+    const saved = await this.userRepo.save(user);
     const { password_hash: _, ...safe } = saved;
     return safe;
   }

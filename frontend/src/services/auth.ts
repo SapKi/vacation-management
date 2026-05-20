@@ -1,5 +1,7 @@
 import api from "./api";
 import { UserRole } from "../constants";
+import { IStorage } from "../storage/IStorage";
+import { LocalStorageAdapter } from "../storage/LocalStorage";
 
 export interface AuthUser {
   id: number;
@@ -15,29 +17,32 @@ export interface RegisterPayload {
 
 const STORAGE_KEY = "vm_user";
 
-export const authService = {
-  login(name: string, password: string) {
-    return api.post<AuthUser>("/auth/login", { name, password });
-  },
+export function createAuthService(storage: IStorage = new LocalStorageAdapter()) {
+  return {
+    login(name: string, password: string) {
+      return api.post<AuthUser>("/auth/login", { name, password });
+    },
 
-  register(payload: RegisterPayload) {
-    return api.post<AuthUser>("/auth/register", payload);
-  },
+    register(payload: RegisterPayload) {
+      return api.post<AuthUser>("/auth/register", payload);
+    },
 
-  save(user: AuthUser): void {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
-  },
+    save(user: AuthUser): void {
+      storage.set(STORAGE_KEY, user);
+    },
 
-  get(): AuthUser | null {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? (JSON.parse(raw) as AuthUser) : null;
-  },
+    get(): AuthUser | null {
+      return storage.get<AuthUser>(STORAGE_KEY);
+    },
 
-  clear(): void {
-    localStorage.removeItem(STORAGE_KEY);
-  },
+    clear(): void {
+      storage.remove(STORAGE_KEY);
+    },
 
-  isLoggedIn(): boolean {
-    return !!localStorage.getItem(STORAGE_KEY);
-  },
-};
+    isLoggedIn(): boolean {
+      return storage.has(STORAGE_KEY);
+    },
+  };
+}
+
+export const authService = createAuthService();

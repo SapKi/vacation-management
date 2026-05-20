@@ -1,102 +1,35 @@
-import { Request, Response, NextFunction } from "express";
 import { VacationRequestService } from "../services/vacationRequest.service";
+import { asyncHandler } from "../utils/asyncHandler";
 
-const service = new VacationRequestService();
+export function createVacationRequestController(service: VacationRequestService) {
+  return {
+    createRequest: asyncHandler(async (req, res) => {
+      res.status(201).json(await service.createRequest(req.body));
+    }),
 
-export const createRequest = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const result = await service.createRequest(req.body);
-    res.status(201).json(result);
-  } catch (err) {
-    next(err);
-  }
-};
+    getRequestsByUser: asyncHandler(async (req, res) => {
+      res.json(await service.getRequestsByUser(parseInt(req.params.userId, 10)));
+    }),
 
-export const getRequestsByUser = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const userId = parseInt(req.params.userId, 10);
-    const result = await service.getRequestsByUser(userId);
-    res.json(result);
-  } catch (err) {
-    next(err);
-  }
-};
+    getAllRequests: asyncHandler(async (req, res) => {
+      res.json(await service.getAllRequests(req.query.status as string | undefined));
+    }),
 
-export const getAllRequests = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const { status } = req.query;
-    const result = await service.getAllRequests(status as string | undefined);
-    res.json(result);
-  } catch (err) {
-    next(err);
-  }
-};
+    updateRequest: asyncHandler(async (req, res) => {
+      res.json(await service.updateRequest(parseInt(req.params.id, 10), req.body));
+    }),
 
-export const updateRequest = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const id = parseInt(req.params.id, 10);
-    const result = await service.updateRequest(id, req.body);
-    res.json(result);
-  } catch (err) {
-    next(err);
-  }
-};
+    approveRequest: asyncHandler(async (req, res) => {
+      res.json(await service.approveRequest(parseInt(req.params.id, 10)));
+    }),
 
-export const approveRequest = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const id = parseInt(req.params.id, 10);
-    const result = await service.approveRequest(id);
-    res.json(result);
-  } catch (err) {
-    next(err);
-  }
-};
+    rejectRequest: asyncHandler(async (req, res) => {
+      res.json(await service.rejectRequest(parseInt(req.params.id, 10), req.body.comments));
+    }),
 
-export const deleteRequest = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const id = parseInt(req.params.id, 10);
-    await service.deleteRequest(id);
-    res.status(204).send();
-  } catch (err) {
-    next(err);
-  }
-};
-
-export const rejectRequest = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const id = parseInt(req.params.id, 10);
-    const { comments } = req.body;
-    const result = await service.rejectRequest(id, comments);
-    res.json(result);
-  } catch (err) {
-    next(err);
-  }
-};
+    deleteRequest: asyncHandler(async (req, res) => {
+      await service.deleteRequest(parseInt(req.params.id, 10));
+      res.status(204).send();
+    }),
+  };
+}

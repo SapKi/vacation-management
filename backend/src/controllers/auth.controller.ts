@@ -1,25 +1,17 @@
-import { Request, Response, NextFunction } from "express";
-import { AuthService } from "../services/auth.service";
 import { UserRole } from "../entities/User";
+import { AuthService } from "../services/auth.service";
+import { asyncHandler } from "../utils/asyncHandler";
 
-const service = new AuthService();
+export function createAuthController(service: AuthService) {
+  return {
+    login: asyncHandler(async (req, res) => {
+      const { name, password } = req.body;
+      res.json(await service.login(name, password));
+    }),
 
-export const login = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const { name, password } = req.body;
-    const user = await service.login(name, password);
-    res.json(user);
-  } catch (err) {
-    next(err);
-  }
-};
-
-export const register = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const { name, role, password } = req.body;
-    const user = await service.register(name, role as UserRole, password);
-    res.status(201).json(user);
-  } catch (err) {
-    next(err);
-  }
-};
+    register: asyncHandler(async (req, res) => {
+      const { name, role, password } = req.body;
+      res.status(201).json(await service.register(name, role as UserRole, password));
+    }),
+  };
+}

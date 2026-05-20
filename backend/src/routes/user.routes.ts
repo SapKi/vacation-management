@@ -1,31 +1,19 @@
 import { Router } from "express";
-import { AppDataSource } from "../data-source";
-import { User } from "../entities/User";
+import { IUserRepository } from "../repositories/IUserRepository";
+import { asyncHandler } from "../utils/asyncHandler";
 
-const router = Router();
+export function createUserRouter(userRepo: IUserRepository): Router {
+  const router = Router();
 
-router.get("/", async (_req, res, next) => {
-  try {
-    const users = await AppDataSource.getRepository(User).find();
-    res.json(users);
-  } catch (err) {
-    next(err);
-  }
-});
+  router.get("/", asyncHandler(async (_req, res) => {
+    res.json(await userRepo.findAll());
+  }));
 
-router.get("/:id", async (req, res, next) => {
-  try {
-    const user = await AppDataSource.getRepository(User).findOneBy({
-      id: parseInt(req.params.id, 10),
-    });
-    if (!user) {
-      res.status(404).json({ error: "User not found" });
-      return;
-    }
+  router.get("/:id", asyncHandler(async (req, res) => {
+    const user = await userRepo.findById(parseInt(req.params.id, 10));
+    if (!user) { res.status(404).json({ error: "User not found" }); return; }
     res.json(user);
-  } catch (err) {
-    next(err);
-  }
-});
+  }));
 
-export default router;
+  return router;
+}
