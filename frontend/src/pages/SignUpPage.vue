@@ -215,17 +215,17 @@ async function submit() {
 .sp-submit {
   width: 100%; margin-top: 1.25rem;
   display: flex; align-items: center; justify-content: center; gap: 0.5rem;
-  padding: 0.72rem; background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-  color: #fff; border: none; border-radius: 10px;
+  padding: 0.72rem; background: linear-gradient(135deg, #ccb800 0%, #ffe600 100%);
+  color: #0d1117; border: none; border-radius: 10px;
   font-size: 0.9rem; font-weight: 700; cursor: pointer; font-family: inherit;
-  box-shadow: 0 4px 20px rgba(99,102,241,0.35); transition: all 0.18s ease;
+  box-shadow: 0 4px 20px rgba(255,230,0,0.35); transition: all 0.18s ease;
 }
-.sp-submit:hover:not(:disabled) { background: linear-gradient(135deg, #4338ca 0%, #6d28d9 100%); transform: translateY(-1px); }
+.sp-submit:hover:not(:disabled) { background: linear-gradient(135deg, #ffe600 0%, #fff176 100%); transform: translateY(-1px); }
 .sp-submit:disabled { opacity: 0.6; cursor: not-allowed; }
 
 .sp-footer { text-align: center; font-size: 0.78rem; color: #475569; margin-top: 1.25rem; }
-.sp-link { color: #818cf8; text-decoration: none; font-weight: 600; }
-.sp-link:hover { color: #a5b4fc; }
+.sp-link { color: #ffe600; text-decoration: none; font-weight: 600; }
+.sp-link:hover { color: #fff176; }
 
 .sp-spinner {
   width: 15px; height: 15px;

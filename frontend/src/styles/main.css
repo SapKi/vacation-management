@@ -224,12 +224,12 @@ body {
 .btn:disabled { opacity: 0.55; cursor: not-allowed; }
 
 .btn-primary {
-  background: linear-gradient(135deg, #c9106d 0%, #f72585 100%);
-  color: #fff;
-  box-shadow: 0 2px 8px rgba(247,37,133,0.45), 0 0 0 1px rgba(247,37,133,0.2);
+  background: linear-gradient(135deg, #ccb800 0%, #ffe600 100%);
+  color: #0d1117;
+  box-shadow: 0 2px 8px rgba(255,230,0,0.45), 0 0 0 1px rgba(255,230,0,0.2);
 }
 .btn-primary:hover:not(:disabled) {
-  box-shadow: 0 4px 16px rgba(247,37,133,0.55), 0 0 0 1px rgba(247,37,133,0.35);
+  box-shadow: 0 4px 16px rgba(255,230,0,0.55), 0 0 0 1px rgba(255,230,0,0.35);
   transform: translateY(-1px);
 }
 
@@ -329,7 +329,7 @@ body {
   cursor: pointer; transition: all 0.14s ease; letter-spacing: 0.1px; font-family: inherit;
 }
 .filter-btn:hover { border-color: var(--primary); color: #a5b4fc; }
-.filter-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); box-shadow: 0 1px 8px rgba(99,102,241,0.4); }
+.filter-btn.active { background: linear-gradient(135deg, #ccb800 0%, #ffe600 100%); color: #0d1117; border-color: #ffe600; box-shadow: 0 1px 8px rgba(255,230,0,0.4); }
 
 /* ── Modal ──────────────────────────────────────────── */
 .modal-overlay {
