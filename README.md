@@ -7,20 +7,19 @@ A full-stack web application for managing employee vacation requests. Employees 
 ## Table of Contents
 
 1. [Overview](#overview)
-2. [Tech Stack](#tech-stack)
-3. [Architecture](#architecture)
-4. [Project Structure](#project-structure)
-5. [Database Schema](#database-schema)
-6. [API Reference](#api-reference)
-7. [Endpoint Implementation](#endpoint-implementation)
-8. [Frontend Pages & Components](#frontend-pages--components)
-9. [State Management & Services](#state-management--services)
-10. [Environment Variables](#environment-variables)
-11. [Local Setup](#local-setup)
-12. [Seed Data](#seed-data)
-13. [Testing](#testing)
-14. [Design Decisions](#design-decisions)
-15. [Known Limitations](#known-limitations)
+2. [Local Setup](#local-setup)
+3. [Tech Stack](#tech-stack)
+4. [Architecture](#architecture)
+5. [Project Structure](#project-structure)
+6. [Database Schema](#database-schema)
+7. [API Reference](#api-reference)
+8. [Endpoint Implementation](#endpoint-implementation)
+9. [Frontend Pages & Components](#frontend-pages--components)
+10. [State Management & Services](#state-management--services)
+11. [Seed Data](#seed-data)
+12. [Testing](#testing)
+13. [Design Decisions](#design-decisions)
+14. [Known Limitations](#known-limitations)
 
 ---
 
@@ -34,6 +33,74 @@ The platform supports two user roles:
 | **Validator** | View all employees' requests, filter by status, approve or reject with a comment |
 
 Sessions are stored in `localStorage`. There is no JWT — the user object is persisted directly after a successful login.
+
+---
+
+## Local Setup
+
+### Prerequisites
+
+- Node.js 18+
+- PostgreSQL 14+ running locally
+
+### 1. Create the database
+
+```bash
+psql -U postgres -c "CREATE DATABASE vacation_management;"
+```
+
+### 2. Start the backend
+
+```bash
+cd backend
+npm install
+npm run dev
+# → http://localhost:3000
+```
+
+TypeORM `synchronize: true` creates the `users` and `vacation_requests` tables automatically on first start.
+
+### 3. Seed demo data
+
+```bash
+cd backend
+npm run seed
+```
+
+Wipes all existing data and creates two demo users plus 3 sample requests.
+
+| User | Role | Password |
+|---|---|---|
+| Alice Johnson | Requester | `Tr0pic@lLeave!` |
+| Bob Smith | Validator | `Appr0ve&Rest!` |
+
+### 4. Start the frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
+# → http://localhost:5173
+```
+
+### Environment Variables
+
+All backend values default to the settings above — no `.env` file needed for local development.
+
+**`backend/.env`** (optional overrides):
+```env
+DB_HOST=localhost
+DB_PORT=5432
+DB_USERNAME=postgres
+DB_PASSWORD=postgres
+DB_NAME=vacation_management
+DB_SYNC=true
+```
+
+**`frontend/.env`** (optional override):
+```env
+VITE_API_BASE_URL=http://localhost:3000/api
+```
 
 ---
 
@@ -708,80 +775,7 @@ getApiError(err: unknown, fallback?: string): string
 
 ---
 
-## Environment Variables
-
-### Backend — `backend/.env`
-
-```env
-DB_HOST=localhost
-DB_PORT=5432
-DB_USERNAME=postgres
-DB_PASSWORD=postgres
-DB_NAME=vacation_management
-```
-
-All values have defaults in `data-source.ts` — the server starts without a `.env` file in development.
-
-### Frontend — `frontend/.env`
-
-```env
-VITE_API_BASE_URL=http://localhost:3000/api
-```
-
-If not set, Axios defaults to `http://localhost:3000/api`.
-
----
-
-## Local Setup
-
-### Prerequisites
-
-- Node.js 18+
-- PostgreSQL 14+ running locally
-
-### 1. Create the database
-
-```bash
-psql -U postgres -c "CREATE DATABASE vacation_management;"
-```
-
-### 2. Start the backend
-
-```bash
-cd backend
-npm install
-npm run dev
-# → http://localhost:3000
-```
-
-TypeORM `synchronize: true` creates the `users` and `vacation_requests` tables automatically on first start.
-
-### 3. Seed demo data
-
-```bash
-cd backend
-npm run seed
-```
-
-Wipes all existing data and creates two demo users plus 3 sample requests (see [Seed Data](#seed-data) below).
-
-### 4. Start the frontend
-
-```bash
-cd frontend
-npm install
-npm run dev
-# → http://localhost:5173
-```
-
----
-
 ## Seed Data
-
-| User | Role | Password |
-|---|---|---|
-| Alice Johnson | Requester | `Tr0pic@lLeave!` |
-| Bob Smith | Validator | `Appr0ve&Rest!` |
 
 **Sample vacation requests (Alice Johnson):**
 
