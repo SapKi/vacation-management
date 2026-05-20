@@ -86,14 +86,6 @@
       <rect x="6" y="12" width="7" height="2.5" rx="1" stroke="currentColor" stroke-width="1" fill="none"/>
     </svg>
 
-    <!-- Flip flops / sandal -->
-    <svg class="vd vd-green" style="bottom:12%;left:38%" viewBox="0 0 38 28" width="38" height="28">
-      <path d="M 4 14 C 4 8 10 4 20 4 C 30 4 34 8 34 14 C 34 20 28 24 20 24 C 12 24 4 20 4 14 Z"
-            stroke="currentColor" stroke-width="1.5" fill="none"/>
-      <path d="M 20 4 C 17 9 13 11 9 11"  stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/>
-      <path d="M 20 4 C 23 9 27 11 31 11" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/>
-    </svg>
-
     <!-- Suitcase -->
     <svg class="vd vd-pink" style="top:16%;left:16%" viewBox="0 0 34 32" width="34" height="32">
       <rect x="1" y="9" width="32" height="21" rx="3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linejoin="round"/>

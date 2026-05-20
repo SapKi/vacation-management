@@ -530,8 +530,8 @@ npm run dev
 
 | User | Role | Password |
 |---|---|---|
-| Alice Johnson | Requester | `alice123` |
-| Bob Smith | Validator | `bob123` |
+| Alice Johnson | Requester | `Tr0pic@lLeave!` |
+| Bob Smith | Validator | `Appr0ve&Rest!` |
 
 **Sample vacation requests (Alice Johnson):**
 

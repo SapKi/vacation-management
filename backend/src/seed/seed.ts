@@ -22,12 +22,12 @@ async function seed() {
   const requester = userRepo.create({
     name: "Alice Johnson",
     role: UserRole.REQUESTER,
-    password_hash: await bcrypt.hash("alice123", 10),
+    password_hash: await bcrypt.hash("Tr0pic@lLeave!", 10),
   });
   const validator = userRepo.create({
     name: "Bob Smith",
     role: UserRole.VALIDATOR,
-    password_hash: await bcrypt.hash("bob123", 10),
+    password_hash: await bcrypt.hash("Appr0ve&Rest!", 10),
   });
 
   const [savedRequester] = await userRepo.save([requester, validator]);

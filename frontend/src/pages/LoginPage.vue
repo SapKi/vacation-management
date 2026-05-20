@@ -44,10 +44,10 @@
       <div class="lp-demo">
         <span class="lp-demo-label">Demo accounts</span>
         <div class="lp-demo-rows">
-          <button class="lp-demo-btn" type="button" @click="fillDemo('Alice Johnson', 'alice123')">
+          <button class="lp-demo-btn" type="button" @click="fillDemo('Alice Johnson', 'Tr0pic@lLeave!')">
             Alice Johnson <span class="lp-demo-role">Requester</span>
           </button>
-          <button class="lp-demo-btn" type="button" @click="fillDemo('Bob Smith', 'bob123')">
+          <button class="lp-demo-btn" type="button" @click="fillDemo('Bob Smith', 'Appr0ve&Rest!')">
             Bob Smith <span class="lp-demo-role">Validator</span>
           </button>
         </div>
@@ -188,7 +188,7 @@ async function submit() {
   padding-top: 1.25rem;
   border-top: 1px solid rgba(255,255,255,0.05);
 }
-.lp-demo-label { display: block; font-size: 0.67rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #334155; margin-bottom: 0.6rem; }
+.lp-demo-label { display: block; font-size: 0.67rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #f1f5f9; margin-bottom: 0.6rem; }
 .lp-demo-rows  { display: flex; flex-direction: column; gap: 0.4rem; }
 .lp-demo-btn {
   display: flex; align-items: center; justify-content: space-between;
