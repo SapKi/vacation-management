@@ -47,6 +47,7 @@
 import { computed } from "vue";
 import { X, AlertTriangle, CalendarRange, MessageSquare } from "lucide-vue-next";
 import type { VacationRequest } from "../services/vacationRequestsApi";
+import { formatDate, daysBetween } from "../utils/date";
 
 const props = defineProps<{
   request: VacationRequest;
@@ -55,13 +56,5 @@ const props = defineProps<{
 
 defineEmits<{ confirm: []; cancel: [] }>();
 
-const dayCount = computed(() => {
-  const start = new Date(props.request.start_date);
-  const end   = new Date(props.request.end_date);
-  return Math.round((end.getTime() - start.getTime()) / 86400000) + 1;
-});
-
-function formatDate(d: string) {
-  return new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
-}
+const dayCount = computed(() => daysBetween(props.request.start_date, props.request.end_date));
 </script>

@@ -54,7 +54,7 @@ import { vacationRequestsApi } from "../services/vacationRequestsApi";
 import type { VacationRequest } from "../services/vacationRequestsApi";
 import { useAuth }      from "../composables/useAuth";
 import { getApiError }  from "../utils/error";
-import { STATUS_FILTER_OPTIONS } from "../constants";
+import { STATUS_FILTER_OPTIONS, NOTIFICATION_DISMISS_MS } from "../constants";
 
 const { currentUser } = useAuth();
 
@@ -91,7 +91,7 @@ async function handleApprove(id: number) {
     await vacationRequestsApi.approve(id);
     actionSuccess.value = "Request approved successfully.";
     await loadRequests();
-    setTimeout(() => { actionSuccess.value = ""; }, 3000);
+    setTimeout(() => { actionSuccess.value = ""; }, NOTIFICATION_DISMISS_MS);
   } catch (err: unknown) {
     actionError.value = getApiError(err, "Failed to approve request.");
   } finally {
@@ -113,7 +113,7 @@ async function handleReject(comment: string) {
     rejectTargetId.value  = null;
     actionSuccess.value   = "Request rejected.";
     await loadRequests();
-    setTimeout(() => { actionSuccess.value = ""; }, 3000);
+    setTimeout(() => { actionSuccess.value = ""; }, NOTIFICATION_DISMISS_MS);
   } catch (err: unknown) {
     actionError.value    = getApiError(err, "Failed to reject request.");
     rejectTargetId.value = null;

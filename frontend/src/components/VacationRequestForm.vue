@@ -57,6 +57,7 @@ import { CheckCircle, AlertCircle } from "lucide-vue-next";
 import { vacationRequestsApi } from "../services/vacationRequestsApi";
 import { useAuth }     from "../composables/useAuth";
 import { getApiError } from "../utils/error";
+import { FORM_SUCCESS_DISMISS_MS } from "../constants";
 
 const { currentUser } = useAuth();
 
@@ -93,7 +94,7 @@ async function handleSubmit() {
     form.startDate = form.endDate = form.reason = "";
     success.value = true;
     emit("submitted");
-    setTimeout(() => { success.value = false; }, 4000);
+    setTimeout(() => { success.value = false; }, FORM_SUCCESS_DISMISS_MS);
   } catch (err: unknown) {
     submitError.value = getApiError(err, "Failed to submit request. Please try again.");
   } finally {

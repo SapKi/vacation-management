@@ -32,6 +32,10 @@ export const ROUTES = {
 
 export type AppRoute = typeof ROUTES[keyof typeof ROUTES];
 
+// ── Timing ───────────────────────────────────────────
+export const NOTIFICATION_DISMISS_MS = 3000;
+export const FORM_SUCCESS_DISMISS_MS  = 4000;
+
 // ── Helpers ──────────────────────────────────────────
 
 /** Maps a user role to its dashboard route. Single source of truth. */

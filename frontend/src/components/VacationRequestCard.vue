@@ -53,6 +53,7 @@ import { User, Check, X, MessageSquare, Pencil, Ban } from "lucide-vue-next";
 import StatusBadge from "./StatusBadge.vue";
 import type { VacationRequest } from "../services/vacationRequestsApi";
 import { RequestStatus } from "../constants";
+import { formatDate, formatRelative, daysBetween } from "../utils/date";
 
 const props = defineProps<{
   request: VacationRequest;
@@ -70,23 +71,5 @@ defineEmits<{
   cancel:  [id: number];
 }>();
 
-const dayCount = computed(() => {
-  const start = new Date(props.request.start_date);
-  const end   = new Date(props.request.end_date);
-  return Math.round((end.getTime() - start.getTime()) / 86400000) + 1;
-});
-
-function formatDate(d: string) {
-  return new Date(d).toLocaleDateString("en-US", {
-    month: "short", day: "numeric", year: "numeric", timeZone: "UTC",
-  });
-}
-
-function formatRelative(d: string) {
-  const days = Math.floor((Date.now() - new Date(d).getTime()) / 86400000);
-  if (days === 0) return "Submitted today";
-  if (days === 1) return "Submitted yesterday";
-  if (days < 7)  return `Submitted ${days} days ago`;
-  return `Submitted ${new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric" })}`;
-}
+const dayCount = computed(() => daysBetween(props.request.start_date, props.request.end_date));
 </script>

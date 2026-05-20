@@ -51,9 +51,8 @@ export class VacationRequestService {
   }
 
   async getAllRequests(status?: string): Promise<VacationRequest[]> {
-    const validStatuses = ["Pending", "Approved", "Rejected"];
     const where: Partial<VacationRequest> = {};
-    if (status && validStatuses.includes(status)) {
+    if (status && (Object.values(RequestStatus) as string[]).includes(status)) {
       where.status = status as RequestStatus;
     }
 
