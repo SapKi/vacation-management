@@ -88,6 +88,34 @@ The backend exposes a REST API on port **3000**. The frontend dev server runs on
 
 All layers are wired through dependency injection — no layer imports concrete implementations directly. Swapping PostgreSQL for another DB requires only new `IRepository` implementations registered in `container.ts`.
 
+### Request Flow
+
+Every request travels through the following chain:
+
+```
+User (Browser / Vue 3)
+   │  Axios HTTP
+   ▼
+Express Route (factory)
+   │
+   ▼
+asyncHandler → Controller (factory)
+                   │
+                   ▼
+                Service
+                   ├── Validator (pure functions — no DB)
+                   │
+                   └── IRepository<T> (interface)
+                              │
+                              ▼
+                       TypeOrmRepository (concrete impl)
+                              │
+                              ▼
+                          PostgreSQL
+```
+
+Errors thrown at any layer propagate via `asyncHandler` → `errorHandler` middleware → `{ error: "message" }` JSON response.
+
 ---
 
 ## Project Structure
