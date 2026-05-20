@@ -1,54 +1,78 @@
 <template>
   <div class="hp">
-    <!-- Background layers -->
     <div class="hp-grid" />
     <div class="hp-glow hp-glow--a" />
     <div class="hp-glow hp-glow--b" />
     <div class="hp-glow hp-glow--c" />
 
-    <!-- Content -->
     <div class="hp-body">
-
-      <!-- Eyebrow badge -->
       <div class="hp-badge">
         <span class="hp-badge-dot" />
         Vacation Management Platform
       </div>
 
-      <!-- Headline -->
       <h1 class="hp-headline">
         Time Off, <span class="hp-headline-grad">Handled.</span>
       </h1>
-
-      <!-- Sub -->
       <p class="hp-sub">
         Submit requests, track approvals, and keep your whole team aligned —
         from one clean workspace.
       </p>
 
-      <!-- Action buttons -->
-      <div class="hp-actions">
-        <RouterLink to="/requester" class="hp-btn hp-btn--primary">
-          <User :size="17" stroke-width="2" />
-          Request Time Off
-          <ChevronRight :size="15" stroke-width="2.5" class="hp-btn-arrow" />
-        </RouterLink>
-        <RouterLink to="/validator" class="hp-btn hp-btn--ghost">
-          <ShieldCheck :size="17" stroke-width="2" />
-          Review Requests
-        </RouterLink>
-      </div>
+      <!-- Already logged in -->
+      <template v-if="isLoggedIn">
+        <div class="hp-session">
+          <span class="hp-session-avatar">{{ currentUser!.name[0] }}</span>
+          <div class="hp-session-info">
+            <span class="hp-session-name">{{ currentUser!.name }}</span>
+            <span class="hp-session-role">{{ currentUser!.role }}</span>
+          </div>
+        </div>
+        <div class="hp-actions">
+          <RouterLink :to="currentUser!.role === 'Requester' ? '/requester' : '/validator'" class="hp-btn hp-btn--primary">
+            <ArrowRight :size="17" stroke-width="2" />
+            Continue to Dashboard
+          </RouterLink>
+          <button class="hp-btn hp-btn--ghost" @click="switchAccount">
+            <RefreshCw :size="16" stroke-width="2" />
+            Switch Account
+          </button>
+        </div>
+      </template>
 
+      <!-- Not logged in -->
+      <template v-else>
+        <div class="hp-actions">
+          <RouterLink to="/login" class="hp-btn hp-btn--primary">
+            <LogIn :size="17" stroke-width="2" />
+            Sign In
+            <ChevronRight :size="15" stroke-width="2.5" class="hp-btn-arrow" />
+          </RouterLink>
+          <RouterLink to="/signup" class="hp-btn hp-btn--ghost">
+            <UserPlus :size="17" stroke-width="2" />
+            Create Account
+          </RouterLink>
+        </div>
+      </template>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { User, ShieldCheck, ChevronRight } from "lucide-vue-next";
+import { useRouter } from "vue-router";
+import { LogIn, UserPlus, ChevronRight, ArrowRight, RefreshCw } from "lucide-vue-next";
+import { useAuth } from "../composables/useAuth";
+
+const router = useRouter();
+const { currentUser, isLoggedIn, logout } = useAuth();
+
+function switchAccount() {
+  logout();
+  router.push("/login");
+}
 </script>
 
 <style scoped>
-/* ── Full-page dark shell ── */
 .hp {
   position: relative;
   min-height: calc(100vh - 58px);
@@ -60,7 +84,6 @@ import { User, ShieldCheck, ChevronRight } from "lucide-vue-next";
   padding: 3rem 1.5rem;
 }
 
-/* ── Grid overlay ── */
 .hp-grid {
   position: absolute;
   inset: 0;
@@ -71,30 +94,16 @@ import { User, ShieldCheck, ChevronRight } from "lucide-vue-next";
   mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 40%, transparent 100%);
 }
 
-/* ── Glow orbs ── */
 .hp-glow {
   position: absolute;
   border-radius: 50%;
   pointer-events: none;
   filter: blur(80px);
 }
-.hp-glow--a {
-  width: 560px; height: 560px;
-  background: radial-gradient(circle, rgba(99,102,241,0.22) 0%, transparent 70%);
-  top: -140px; left: -80px;
-}
-.hp-glow--b {
-  width: 480px; height: 480px;
-  background: radial-gradient(circle, rgba(139,92,246,0.18) 0%, transparent 70%);
-  bottom: -120px; right: -60px;
-}
-.hp-glow--c {
-  width: 300px; height: 300px;
-  background: radial-gradient(circle, rgba(34,211,238,0.10) 0%, transparent 70%);
-  top: 30%; right: 15%;
-}
+.hp-glow--a { width: 560px; height: 560px; background: radial-gradient(circle, rgba(99,102,241,0.22) 0%, transparent 70%); top: -140px; left: -80px; }
+.hp-glow--b { width: 480px; height: 480px; background: radial-gradient(circle, rgba(139,92,246,0.18) 0%, transparent 70%); bottom: -120px; right: -60px; }
+.hp-glow--c { width: 300px; height: 300px; background: radial-gradient(circle, rgba(34,211,238,0.10) 0%, transparent 70%); top: 30%; right: 15%; }
 
-/* ── Content block ── */
 .hp-body {
   position: relative;
   z-index: 1;
@@ -103,10 +112,8 @@ import { User, ShieldCheck, ChevronRight } from "lucide-vue-next";
   align-items: center;
   text-align: center;
   max-width: 600px;
-  gap: 0;
 }
 
-/* ── Badge ── */
 .hp-badge {
   display: inline-flex;
   align-items: center;
@@ -136,7 +143,6 @@ import { User, ShieldCheck, ChevronRight } from "lucide-vue-next";
   50%       { opacity: 0.6; transform: scale(0.85); }
 }
 
-/* ── Headline ── */
 .hp-headline {
   font-size: clamp(2.8rem, 6vw, 4.2rem);
   font-weight: 800;
@@ -153,22 +159,49 @@ import { User, ShieldCheck, ChevronRight } from "lucide-vue-next";
   background-clip: text;
 }
 
-/* ── Sub ── */
 .hp-sub {
   font-size: 1rem;
   color: #64748b;
   line-height: 1.7;
   max-width: 440px;
-  margin-bottom: 2.5rem;
+  margin-bottom: 2.25rem;
 }
 
-/* ── Buttons ── */
+/* Logged-in session pill */
+.hp-session {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(99,102,241,0.25);
+  border-radius: 12px;
+  padding: 0.7rem 1.1rem;
+  margin-bottom: 1.5rem;
+}
+
+.hp-session-avatar {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: rgba(99,102,241,0.2);
+  border: 1px solid rgba(99,102,241,0.4);
+  color: #a5b4fc;
+  font-size: 0.85rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hp-session-info { display: flex; flex-direction: column; text-align: left; }
+.hp-session-name { font-size: 0.875rem; font-weight: 700; color: #e2e8f0; }
+.hp-session-role { font-size: 0.72rem; color: #475569; }
+
+/* Buttons */
 .hp-actions {
   display: flex;
   gap: 0.85rem;
   flex-wrap: wrap;
   justify-content: center;
-  margin-bottom: 2.75rem;
 }
 
 .hp-btn {
@@ -182,8 +215,9 @@ import { User, ShieldCheck, ChevronRight } from "lucide-vue-next";
   text-decoration: none;
   letter-spacing: -0.1px;
   transition: all 0.18s ease;
-  position: relative;
   cursor: pointer;
+  border: none;
+  font-family: inherit;
 }
 
 .hp-btn--primary {
@@ -201,14 +235,12 @@ import { User, ShieldCheck, ChevronRight } from "lucide-vue-next";
 .hp-btn--primary:hover .hp-btn-arrow { transform: translateX(3px); }
 
 .hp-btn--ghost {
-  background: rgba(255,255,255,0.04);
-  color: #94a3b8;
-  /* gradient border via background-clip trick */
   background-image: linear-gradient(rgba(15,23,42,0.6), rgba(15,23,42,0.6)),
                     linear-gradient(135deg, rgba(99,102,241,0.5), rgba(139,92,246,0.5));
   background-origin: border-box;
   background-clip: padding-box, border-box;
   border: 1.5px solid transparent;
+  color: #94a3b8;
 }
 .hp-btn--ghost:hover {
   color: #e2e8f0;
@@ -220,7 +252,6 @@ import { User, ShieldCheck, ChevronRight } from "lucide-vue-next";
   box-shadow: 0 4px 16px rgba(99,102,241,0.18);
 }
 
-/* ── Responsive ── */
 @media (max-width: 480px) {
   .hp-actions { flex-direction: column; align-items: stretch; }
   .hp-btn { justify-content: center; }

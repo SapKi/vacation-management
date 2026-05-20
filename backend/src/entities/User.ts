@@ -21,6 +21,9 @@ export class User {
   })
   role: UserRole;
 
+  @Column({ nullable: true, select: false })
+  password_hash: string;
+
   @OneToMany(() => VacationRequest, (request) => request.user)
   vacationRequests: VacationRequest[];
 }

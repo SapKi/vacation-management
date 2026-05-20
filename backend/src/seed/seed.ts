@@ -2,6 +2,7 @@ import "reflect-metadata";
 import * as dotenv from "dotenv";
 dotenv.config();
 
+import * as bcrypt from "bcryptjs";
 import { AppDataSource } from "../data-source";
 import { User, UserRole } from "../entities/User";
 import { VacationRequest, RequestStatus } from "../entities/VacationRequest";
@@ -21,10 +22,12 @@ async function seed() {
   const requester = userRepo.create({
     name: "Alice Johnson",
     role: UserRole.REQUESTER,
+    password_hash: await bcrypt.hash("alice123", 10),
   });
   const validator = userRepo.create({
     name: "Bob Smith",
     role: UserRole.VALIDATOR,
+    password_hash: await bcrypt.hash("bob123", 10),
   });
 
   const [savedRequester] = await userRepo.save([requester, validator]);

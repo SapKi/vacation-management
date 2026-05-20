@@ -6,31 +6,32 @@ export interface AuthUser {
   role: "Requester" | "Validator";
 }
 
+export interface RegisterPayload {
+  name: string;
+  role: "Requester" | "Validator";
+  password: string;
+}
+
 const STORAGE_KEY = "vm_user";
 
 export const authService = {
-  /** Call the backend to authenticate and return the user. */
-  login(name: string) {
-    return api.post<AuthUser>("/auth/login", { name });
+  login(name: string, password: string) {
+    return api.post<AuthUser>("/auth/login", { name, password });
   },
 
-  /** Fetch all available demo accounts from the backend. */
-  getAccounts() {
-    return api.get<AuthUser[]>("/auth/accounts");
+  register(payload: RegisterPayload) {
+    return api.post<AuthUser>("/auth/register", payload);
   },
 
-  /** Persist the authenticated user in localStorage. */
   save(user: AuthUser): void {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
   },
 
-  /** Return the stored user, or null if not logged in. */
   get(): AuthUser | null {
     const raw = localStorage.getItem(STORAGE_KEY);
     return raw ? (JSON.parse(raw) as AuthUser) : null;
   },
 
-  /** Remove the stored user (logout). */
   clear(): void {
     localStorage.removeItem(STORAGE_KEY);
   },
