@@ -64,6 +64,32 @@ export class VacationRequestService {
     });
   }
 
+  async updateRequest(
+    id: number,
+    dto: Partial<Pick<CreateRequestDto, "startDate" | "endDate" | "reason">>
+  ): Promise<VacationRequest> {
+    const request = await this.requestRepo.findOneBy({ id: Number(id) });
+    if (!request) throw { status: 404, message: "Vacation request not found" };
+    if (request.status !== RequestStatus.PENDING) {
+      throw { status: 400, message: "Only Pending requests can be edited" };
+    }
+
+    const newStart = dto.startDate ?? request.start_date;
+    const newEnd   = dto.endDate   ?? request.end_date;
+
+    if (!newStart) throw { status: 400, message: "startDate is required" };
+    if (!newEnd)   throw { status: 400, message: "endDate is required" };
+    if (new Date(newEnd) < new Date(newStart)) {
+      throw { status: 400, message: "endDate must be same as or after startDate" };
+    }
+
+    request.start_date = newStart;
+    request.end_date   = newEnd;
+    if (dto.reason !== undefined) request.reason = dto.reason;
+
+    return this.requestRepo.save(request);
+  }
+
   async approveRequest(id: number): Promise<VacationRequest> {
     const request = await this.requestRepo.findOneBy({ id: Number(id) });
     if (!request) throw { status: 404, message: "Vacation request not found" };

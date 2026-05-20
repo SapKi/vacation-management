@@ -39,19 +39,6 @@
         </RouterLink>
       </div>
 
-      <!-- Seeded users -->
-      <div class="hp-users">
-        <div class="hp-user">
-          <span class="hp-avatar hp-avatar--blue">A</span>
-          <span>Alice <span class="hp-role">Requester</span></span>
-        </div>
-        <span class="hp-sep">·</span>
-        <div class="hp-user">
-          <span class="hp-avatar hp-avatar--violet">B</span>
-          <span>Bob <span class="hp-role">Validator</span></span>
-        </div>
-      </div>
-
     </div>
   </div>
 </template>
@@ -232,41 +219,6 @@ import { User, ShieldCheck, ChevronRight } from "lucide-vue-next";
   transform: translateY(-2px);
   box-shadow: 0 4px 16px rgba(99,102,241,0.18);
 }
-
-/* ── Users row ── */
-.hp-users {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  color: #475569;
-  font-size: 0.78rem;
-}
-
-.hp-user {
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-}
-
-.hp-role {
-  color: #334155;
-  font-weight: 600;
-}
-
-.hp-sep { color: #1e293b; font-size: 1rem; }
-
-.hp-avatar {
-  width: 24px; height: 24px;
-  border-radius: 50%;
-  font-size: 0.65rem;
-  font-weight: 800;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  letter-spacing: 0;
-}
-.hp-avatar--blue   { background: #1e3a5f; color: #93c5fd; }
-.hp-avatar--violet { background: #2e1065; color: #c4b5fd; }
 
 /* ── Responsive ── */
 @media (max-width: 480px) {

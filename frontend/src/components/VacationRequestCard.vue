@@ -26,20 +26,30 @@
       <span><strong>Manager note:</strong> {{ request.comments }}</span>
     </div>
 
-    <div v-if="showActions && request.status === 'Pending'" class="request-actions">
-      <button class="btn btn-success btn-sm" :disabled="actionLoading" @click="$emit('approve', request.id)">
-        <Check :size="13" stroke-width="3" /> Approve
+    <div v-if="(showActions && request.status === 'Pending') || (showEdit && request.status === 'Pending')" class="request-actions">
+      <button
+        v-if="showEdit && request.status === 'Pending'"
+        class="btn btn-ghost btn-sm"
+        @click="$emit('edit', request.id)"
+      >
+        <Pencil :size="13" stroke-width="2.5" /> Edit
       </button>
-      <button class="btn btn-danger btn-sm" :disabled="actionLoading" @click="$emit('reject', request.id)">
-        <X :size="13" stroke-width="3" /> Reject
-      </button>
+
+      <template v-if="showActions && request.status === 'Pending'">
+        <button class="btn btn-success btn-sm" :disabled="actionLoading" @click="$emit('approve', request.id)">
+          <Check :size="13" stroke-width="3" /> Approve
+        </button>
+        <button class="btn btn-danger btn-sm" :disabled="actionLoading" @click="$emit('reject', request.id)">
+          <X :size="13" stroke-width="3" /> Reject
+        </button>
+      </template>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed } from "vue";
-import { User, Check, X, MessageSquare } from "lucide-vue-next";
+import { User, Check, X, MessageSquare, Pencil } from "lucide-vue-next";
 import StatusBadge from "./StatusBadge.vue";
 import type { VacationRequest } from "../services/vacationRequestsApi";
 
@@ -47,10 +57,11 @@ const props = defineProps<{
   request: VacationRequest;
   showActions?: boolean;
   showEmployee?: boolean;
+  showEdit?: boolean;
   actionLoading?: boolean;
 }>();
 
-defineEmits<{ approve: [id: number]; reject: [id: number] }>();
+defineEmits<{ approve: [id: number]; reject: [id: number]; edit: [id: number] }>();
 
 const dayCount = computed(() => {
   const start = new Date(props.request.start_date);

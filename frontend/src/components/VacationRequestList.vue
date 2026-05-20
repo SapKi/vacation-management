@@ -26,9 +26,11 @@
         :request="request"
         :show-actions="showActions"
         :show-employee="showEmployee"
+        :show-edit="showEdit"
         :action-loading="actionLoadingId === request.id"
         @approve="$emit('approve', $event)"
         @reject="$emit('reject', $event)"
+        @edit="$emit('edit', $event)"
       />
     </template>
   </div>
@@ -46,11 +48,13 @@ defineProps<{
   emptyMessage?: string;
   showActions?: boolean;
   showEmployee?: boolean;
+  showEdit?: boolean;
   actionLoadingId?: number | null;
 }>();
 
 defineEmits<{
   approve: [id: number];
   reject: [id: number];
+  edit: [id: number];
 }>();
 </script>

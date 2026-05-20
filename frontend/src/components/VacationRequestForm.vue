@@ -66,8 +66,9 @@
 import { ref, reactive } from "vue";
 import { CheckCircle, AlertCircle } from "lucide-vue-next";
 import { vacationRequestsApi } from "../services/vacationRequestsApi";
+import { useAuth } from "../composables/useAuth";
 
-const REQUESTER_USER_ID = 1;
+const { currentUser } = useAuth();
 
 const emit = defineEmits<{ submitted: [] }>();
 
@@ -96,7 +97,7 @@ async function handleSubmit() {
   loading.value = true;
   try {
     await vacationRequestsApi.create({
-      userId: REQUESTER_USER_ID,
+      userId: currentUser.value!.id,
       startDate: form.startDate,
       endDate: form.endDate,
       reason: form.reason || undefined,

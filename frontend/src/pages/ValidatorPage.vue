@@ -2,7 +2,7 @@
   <div class="page-container">
     <div class="page-header">
       <h1 class="page-title">Vacation Request Management</h1>
-      <p class="page-subtitle">Welcome, Bob Smith — Validator</p>
+      <p class="page-subtitle">Welcome, {{ currentUser!.name }} — Validator</p>
     </div>
 
     <div class="card">
@@ -50,6 +50,8 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import { RefreshCw, AlertCircle, CheckCircle } from "lucide-vue-next";
+import { useAuth } from "../composables/useAuth";
+const { currentUser } = useAuth();
 import VacationRequestList from "../components/VacationRequestList.vue";
 import StatusFilter from "../components/StatusFilter.vue";
 import RejectModal from "../components/RejectModal.vue";

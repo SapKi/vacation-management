@@ -44,6 +44,20 @@ export const getAllRequests = async (
   }
 };
 
+export const updateRequest = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const result = await service.updateRequest(id, req.body);
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const approveRequest = async (
   req: Request,
   res: Response,

@@ -34,6 +34,10 @@ export const vacationRequestsApi = {
     });
   },
 
+  update(id: number, payload: Partial<CreateRequestPayload>) {
+    return api.patch<VacationRequest>(`/vacation-requests/${id}`, payload);
+  },
+
   approve(id: number) {
     return api.patch<VacationRequest>(`/vacation-requests/${id}/approve`);
   },
