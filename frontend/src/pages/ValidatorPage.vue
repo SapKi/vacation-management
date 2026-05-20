@@ -9,17 +9,20 @@
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
         <h2 class="card-title" style="border:none; margin:0; padding:0;">All Requests</h2>
         <button class="btn btn-ghost btn-sm" @click="loadRequests" :disabled="loading">
-          ↻ Refresh
+          <RefreshCw :size="14" stroke-width="2" />
+          Refresh
         </button>
       </div>
 
       <StatusFilter v-model="activeFilter" @update:modelValue="loadRequests" />
 
       <div v-if="actionError" class="alert alert-error" style="margin-bottom:1rem">
-        ⚠️ {{ actionError }}
+        <AlertCircle :size="16" stroke-width="2" />
+        {{ actionError }}
       </div>
       <div v-if="actionSuccess" class="alert alert-success" style="margin-bottom:1rem">
-        ✅ {{ actionSuccess }}
+        <CheckCircle :size="16" stroke-width="2" />
+        {{ actionSuccess }}
       </div>
 
       <VacationRequestList
@@ -35,7 +38,6 @@
       />
     </div>
 
-    <!-- Reject Modal -->
     <RejectModal
       v-if="rejectTargetId !== null"
       :loading="actionLoadingId === rejectTargetId"
@@ -47,19 +49,20 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
+import { RefreshCw, AlertCircle, CheckCircle } from "lucide-vue-next";
 import VacationRequestList from "../components/VacationRequestList.vue";
 import StatusFilter from "../components/StatusFilter.vue";
 import RejectModal from "../components/RejectModal.vue";
 import { vacationRequestsApi } from "../services/vacationRequestsApi";
 import type { VacationRequest } from "../services/vacationRequestsApi";
 
-const requests = ref<VacationRequest[]>([]);
-const loading = ref(false);
-const error = ref("");
-const activeFilter = ref("All");
+const requests       = ref<VacationRequest[]>([]);
+const loading        = ref(false);
+const error          = ref("");
+const activeFilter   = ref("All");
 const actionLoadingId = ref<number | null>(null);
-const actionError = ref("");
-const actionSuccess = ref("");
+const actionError    = ref("");
+const actionSuccess  = ref("");
 const rejectTargetId = ref<number | null>(null);
 
 async function loadRequests() {
@@ -71,8 +74,7 @@ async function loadRequests() {
     );
     requests.value = data;
   } catch (err: any) {
-    error.value =
-      err?.response?.data?.error || "Failed to load requests. Is the backend running?";
+    error.value = err?.response?.data?.error || "Failed to load requests. Is the backend running?";
   } finally {
     loading.value = false;
   }
@@ -88,8 +90,7 @@ async function handleApprove(id: number) {
     await loadRequests();
     setTimeout(() => { actionSuccess.value = ""; }, 3000);
   } catch (err: any) {
-    actionError.value =
-      err?.response?.data?.error || "Failed to approve request.";
+    actionError.value = err?.response?.data?.error || "Failed to approve request.";
   } finally {
     actionLoadingId.value = null;
   }
@@ -112,8 +113,7 @@ async function handleReject(comment: string) {
     await loadRequests();
     setTimeout(() => { actionSuccess.value = ""; }, 3000);
   } catch (err: any) {
-    actionError.value =
-      err?.response?.data?.error || "Failed to reject request.";
+    actionError.value = err?.response?.data?.error || "Failed to reject request.";
     rejectTargetId.value = null;
   } finally {
     actionLoadingId.value = null;

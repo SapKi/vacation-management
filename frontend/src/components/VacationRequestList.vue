@@ -6,11 +6,12 @@
     </div>
 
     <div v-else-if="error" class="alert alert-error">
-      ⚠️ {{ error }}
+      <AlertCircle :size="16" stroke-width="2" />
+      {{ error }}
     </div>
 
     <div v-else-if="requests.length === 0" class="empty-state">
-      <div class="empty-icon">📭</div>
+      <Inbox :size="40" stroke-width="1.25" class="empty-icon" />
       <div class="empty-title">No requests found</div>
       <div class="empty-desc">{{ emptyMessage }}</div>
     </div>
@@ -34,6 +35,7 @@
 </template>
 
 <script setup lang="ts">
+import { Inbox, AlertCircle } from "lucide-vue-next";
 import VacationRequestCard from "./VacationRequestCard.vue";
 import type { VacationRequest } from "../services/vacationRequestsApi";
 

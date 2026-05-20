@@ -3,7 +3,8 @@
     <h2 class="card-title">Submit a Vacation Request</h2>
 
     <div v-if="success" class="alert alert-success">
-      ✅ Your request has been submitted successfully!
+      <CheckCircle :size="16" stroke-width="2" />
+      Your request has been submitted successfully!
     </div>
 
     <form @submit.prevent="handleSubmit" novalidate>
@@ -49,7 +50,8 @@
       </div>
 
       <div v-if="submitError" class="alert alert-error">
-        ⚠️ {{ submitError }}
+        <AlertCircle :size="16" stroke-width="2" />
+        {{ submitError }}
       </div>
 
       <button type="submit" class="btn btn-primary" :disabled="loading" style="width:100%">
@@ -62,28 +64,17 @@
 
 <script setup lang="ts">
 import { ref, reactive } from "vue";
+import { CheckCircle, AlertCircle } from "lucide-vue-next";
 import { vacationRequestsApi } from "../services/vacationRequestsApi";
 
-// Requester is always user id=1 (seeded)
 const REQUESTER_USER_ID = 1;
 
-const emit = defineEmits<{
-  submitted: [];
-}>();
+const emit = defineEmits<{ submitted: [] }>();
 
 const today = new Date().toISOString().split("T")[0];
 
-const form = reactive({
-  startDate: "",
-  endDate: "",
-  reason: "",
-});
-
-const errors = reactive({
-  startDate: "",
-  endDate: "",
-});
-
+const form = reactive({ startDate: "", endDate: "", reason: "" });
+const errors = reactive({ startDate: "", endDate: "" });
 const loading = ref(false);
 const success = ref(false);
 const submitError = ref("");
@@ -91,26 +82,17 @@ const submitError = ref("");
 function validate(): boolean {
   errors.startDate = "";
   errors.endDate = "";
-
-  if (!form.startDate) {
-    errors.startDate = "Start date is required.";
-  }
-  if (!form.endDate) {
-    errors.endDate = "End date is required.";
-  }
-  if (form.startDate && form.endDate && form.endDate < form.startDate) {
+  if (!form.startDate) errors.startDate = "Start date is required.";
+  if (!form.endDate)   errors.endDate   = "End date is required.";
+  if (form.startDate && form.endDate && form.endDate < form.startDate)
     errors.endDate = "End date must be on or after the start date.";
-  }
-
   return !errors.startDate && !errors.endDate;
 }
 
 async function handleSubmit() {
   success.value = false;
   submitError.value = "";
-
   if (!validate()) return;
-
   loading.value = true;
   try {
     await vacationRequestsApi.create({
@@ -119,20 +101,14 @@ async function handleSubmit() {
       endDate: form.endDate,
       reason: form.reason || undefined,
     });
-
-    // Reset form
     form.startDate = "";
     form.endDate = "";
     form.reason = "";
     success.value = true;
     emit("submitted");
-
-    setTimeout(() => {
-      success.value = false;
-    }, 4000);
+    setTimeout(() => { success.value = false; }, 4000);
   } catch (err: any) {
-    submitError.value =
-      err?.response?.data?.error || "Failed to submit request. Please try again.";
+    submitError.value = err?.response?.data?.error || "Failed to submit request. Please try again.";
   } finally {
     loading.value = false;
   }
