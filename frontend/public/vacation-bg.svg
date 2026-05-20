@@ -1,0 +1,211 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#1a6fa8"/>
+      <stop offset="40%"  stop-color="#4da8d8"/>
+      <stop offset="75%"  stop-color="#8ecae6"/>
+      <stop offset="100%" stop-color="#b8dff0"/>
+    </linearGradient>
+    <linearGradient id="seaGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#1a7abf"/>
+      <stop offset="50%"  stop-color="#0d5f9e"/>
+      <stop offset="100%" stop-color="#0a4a7c"/>
+    </linearGradient>
+    <linearGradient id="sandGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#f0d49a"/>
+      <stop offset="100%" stop-color="#d4a853"/>
+    </linearGradient>
+    <radialGradient id="sunGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#fff9c4" stop-opacity="1"/>
+      <stop offset="40%"  stop-color="#ffe066" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#f9a825" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="sunCore" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#ffffff"/>
+      <stop offset="60%"  stop-color="#ffe566"/>
+      <stop offset="100%" stop-color="#ffc107"/>
+    </radialGradient>
+    <filter id="softBlur">
+      <feGaussianBlur stdDeviation="3"/>
+    </filter>
+    <filter id="cloudBlur">
+      <feGaussianBlur stdDeviation="6"/>
+    </filter>
+  </defs>
+
+  <!-- Sky -->
+  <rect width="1440" height="900" fill="url(#skyGrad)"/>
+
+  <!-- Sun glow halo -->
+  <circle cx="1150" cy="130" r="130" fill="url(#sunGlow)" opacity="0.5"/>
+  <!-- Sun core -->
+  <circle cx="1150" cy="130" r="58" fill="url(#sunCore)"/>
+  <!-- Sun rays -->
+  <g stroke="#ffd54f" stroke-width="2.5" stroke-linecap="round" opacity="0.55">
+    <line x1="1150" y1="52"  x2="1150" y2="28"/>
+    <line x1="1205" y1="75"  x2="1224" y2="56"/>
+    <line x1="1228" y1="130" x2="1252" y2="130"/>
+    <line x1="1205" y1="185" x2="1224" y2="204"/>
+    <line x1="1150" y1="208" x2="1150" y2="232"/>
+    <line x1="1095" y1="185" x2="1076" y2="204"/>
+    <line x1="1072" y1="130" x2="1048" y2="130"/>
+    <line x1="1095" y1="75"  x2="1076" y2="56"/>
+    <line x1="1189" y1="63"  x2="1202" y2="44"/>
+    <line x1="1111" y1="63"  x2="1098" y2="44"/>
+    <line x1="1218" y1="169" x2="1231" y2="186"/>
+    <line x1="1082" y1="169" x2="1069" y2="186"/>
+  </g>
+
+  <!-- Clouds -->
+  <!-- Cloud 1 (left) -->
+  <g filter="url(#cloudBlur)" opacity="0.88">
+    <ellipse cx="180" cy="112" rx="95"  ry="36" fill="white"/>
+    <ellipse cx="230" cy="96"  rx="70"  ry="42" fill="white"/>
+    <ellipse cx="130" cy="106" rx="58"  ry="28" fill="white"/>
+    <ellipse cx="280" cy="108" rx="50"  ry="30" fill="white"/>
+  </g>
+  <!-- Cloud 2 (center-left) -->
+  <g filter="url(#cloudBlur)" opacity="0.8">
+    <ellipse cx="560" cy="85"  rx="105" ry="32" fill="white"/>
+    <ellipse cx="610" cy="68"  rx="78"  ry="40" fill="white"/>
+    <ellipse cx="505" cy="80"  rx="60"  ry="26" fill="white"/>
+    <ellipse cx="660" cy="78"  rx="55"  ry="28" fill="white"/>
+  </g>
+  <!-- Cloud 3 (center-right, smaller) -->
+  <g filter="url(#cloudBlur)" opacity="0.72">
+    <ellipse cx="850" cy="60"  rx="72"  ry="24" fill="white"/>
+    <ellipse cx="888" cy="48"  rx="52"  ry="30" fill="white"/>
+    <ellipse cx="812" cy="56"  rx="44"  ry="20" fill="white"/>
+  </g>
+
+  <!-- Horizon shimmer line -->
+  <rect x="0" y="498" width="1440" height="4" fill="white" opacity="0.18"/>
+
+  <!-- Ocean body -->
+  <path fill="url(#seaGrad)" d="M0,502 C240,468 480,536 720,502 C960,468 1200,536 1440,502 L1440,900 L0,900 Z"/>
+
+  <!-- Wave 1 -->
+  <path fill="rgba(255,255,255,0.13)"
+        d="M0,530 C180,510 360,554 540,530 C720,506 900,554 1080,530 C1260,506 1380,538 1440,530 L1440,560 L0,560 Z"/>
+  <!-- Wave 2 -->
+  <path fill="rgba(255,255,255,0.09)"
+        d="M0,575 C200,558 400,596 600,575 C800,554 1000,596 1200,575 C1320,565 1390,582 1440,575 L1440,598 L0,598 Z"/>
+  <!-- Wave 3 -->
+  <path fill="rgba(255,255,255,0.07)"
+        d="M0,620 C220,608 440,638 660,620 C880,602 1100,638 1320,620 L1440,618 L1440,640 L0,640 Z"/>
+  <!-- White foam caps on first wave -->
+  <path fill="rgba(255,255,255,0.22)"
+        d="M0,528 C60,522 120,534 180,528 C240,522 300,534 360,528"
+        stroke="none"/>
+  <path fill="rgba(255,255,255,0.22)"
+        d="M700,520 C760,514 820,526 880,520 C940,514 1000,526 1060,520"/>
+  <path fill="rgba(255,255,255,0.22)"
+        d="M1260,530 C1310,524 1380,534 1440,528"/>
+
+  <!-- Sand -->
+  <path fill="url(#sandGrad)" d="M0,800 C180,775 360,825 540,800 C720,775 900,825 1080,800 C1260,775 1380,812 1440,800 L1440,900 L0,900 Z"/>
+  <!-- Sand texture ripples -->
+  <path fill="none" stroke="rgba(180,130,40,0.25)" stroke-width="1.5"
+        d="M40,840 C140,832 240,848 340,840"/>
+  <path fill="none" stroke="rgba(180,130,40,0.2)" stroke-width="1.5"
+        d="M400,855 C520,847 640,863 760,855"/>
+  <path fill="none" stroke="rgba(180,130,40,0.2)" stroke-width="1.5"
+        d="M850,845 C960,838 1070,852 1180,845"/>
+  <path fill="none" stroke="rgba(180,130,40,0.18)" stroke-width="1"
+        d="M1250,858 C1330,852 1400,864 1440,858"/>
+
+  <!-- Palm tree — left -->
+  <g transform="translate(68, 300)">
+    <!-- Trunk with curve -->
+    <path fill="#6d4c1f"
+          d="M24,480 C22,380 18,280 28,180 C32,130 26,80 28,40 C28,20 30,5 30,0
+             C32,5 34,20 36,40 C40,80 38,130 42,180 C50,280 48,380 44,480 Z"/>
+    <!-- Coconuts -->
+    <circle cx="33" cy="45"  r="9"  fill="#8b6914" opacity="0.9"/>
+    <circle cx="22" cy="55"  r="8"  fill="#7a5c10" opacity="0.9"/>
+    <!-- Leaves -->
+    <path fill="#1b5e20" d="M32,10 C-20,-18 -75,10 -65,52 C-42,22 -8,28 32,10 Z"/>
+    <path fill="#2e7d32" d="M32,10 C-5,-55 -55,-58 -58,-28 C-38,-40 -10,-28 32,10 Z"/>
+    <path fill="#1b5e20" d="M32,10 C78,-18 120,12 108,52 C88,22 58,28 32,10 Z"/>
+    <path fill="#2e7d32" d="M32,10 C68,-55 115,-50 115,-22 C95,-38 65,-26 32,10 Z"/>
+    <path fill="#388e3c" d="M32,10 C28,-65 8,-80 -4,-58 C12,-52 22,-32 32,10 Z"/>
+    <path fill="#2e7d32" d="M32,10 C38,-65 60,-76 70,-54 C52,-50 40,-30 32,10 Z"/>
+    <path fill="#43a047" d="M32,10 C-50,-5 -85,35 -78,68 C-55,38 -12,32 32,10 Z"/>
+  </g>
+
+  <!-- Palm tree — right -->
+  <g transform="translate(1318, 280)">
+    <path fill="#6d4c1f"
+          d="M28,500 C26,400 22,300 30,200 C34,150 30,95 32,52 C32,30 34,10 34,2
+             C36,10 38,30 40,52 C44,95 42,150 46,200 C52,300 50,400 46,500 Z"/>
+    <!-- Coconuts -->
+    <circle cx="36" cy="58"  r="10" fill="#8b6914" opacity="0.9"/>
+    <circle cx="24" cy="70"  r="8"  fill="#7a5c10" opacity="0.9"/>
+    <!-- Leaves -->
+    <path fill="#1b5e20" d="M34,14 C-22,-14 -78,18 -68,60 C-45,30 -10,34 34,14 Z"/>
+    <path fill="#2e7d32" d="M34,14 C-8,-58 -60,-60 -62,-30 C-42,-44 -12,-30 34,14 Z"/>
+    <path fill="#1b5e20" d="M34,14 C80,-14 122,18 110,60 C90,30 60,34 34,14 Z"/>
+    <path fill="#2e7d32" d="M34,14 C72,-58 120,-55 118,-24 C96,-40 68,-28 34,14 Z"/>
+    <path fill="#388e3c" d="M34,14 C30,-68 10,-82 -2,-62 C14,-54 24,-34 34,14 Z"/>
+    <path fill="#2e7d32" d="M34,14 C40,-68 64,-78 74,-56 C56,-52 42,-32 34,14 Z"/>
+    <path fill="#43a047" d="M34,14 C-52,-4 -90,36 -82,70 C-58,40 -14,36 34,14 Z"/>
+  </g>
+
+  <!-- Sailboat -->
+  <g transform="translate(650, 420)">
+    <!-- Hull -->
+    <path fill="#1565c0" d="M-50,70 C-20,62 20,62 50,70 L42,88 L-42,88 Z"/>
+    <path fill="#0d47a1" d="M-42,88 L42,88 L38,96 L-38,96 Z"/>
+    <!-- Mast -->
+    <line x1="2" y1="0" x2="2" y2="76" stroke="#5d4037" stroke-width="3.5" stroke-linecap="round"/>
+    <!-- Main sail -->
+    <path fill="white" opacity="0.92" d="M2,6 L2,72 L46,72 Z"/>
+    <!-- Jib sail -->
+    <path fill="#ef9a9a" opacity="0.85" d="M2,18 L2,72 L-42,72 Z"/>
+    <!-- Wake lines -->
+    <path fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"
+          d="M-60,90 C-80,88 -110,94 -130,90"/>
+    <path fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1"
+          d="M50,90 C70,88 100,94 120,90"/>
+  </g>
+
+  <!-- Seagulls -->
+  <g fill="none" stroke="#37474f" stroke-width="2.2" stroke-linecap="round" opacity="0.65">
+    <!-- group left -->
+    <path d="M280,195 Q292,184 304,195 Q316,184 328,195"/>
+    <path d="M255,228 Q264,220 273,228 Q282,220 291,228"/>
+    <path d="M310,248 Q317,242 324,248 Q331,242 338,248"/>
+    <!-- group center -->
+    <path d="M760,168 Q771,158 782,168 Q793,158 804,168"/>
+    <path d="M738,198 Q747,191 756,198 Q765,191 774,198"/>
+    <path d="M790,210 Q797,204 804,210 Q811,204 818,210"/>
+    <!-- lone bird right -->
+    <path d="M1050,140 Q1059,132 1068,140 Q1077,132 1086,140"/>
+  </g>
+
+  <!-- Distant shore / island hint -->
+  <ellipse cx="440" cy="502" rx="80" ry="10" fill="#3a8a58" opacity="0.35"/>
+  <ellipse cx="440" cy="498" rx="65" ry="8"  fill="#2e7d32" opacity="0.3"/>
+
+  <!-- Beach umbrella -->
+  <g transform="translate(290, 770)">
+    <line x1="0" y1="0" x2="-10" y2="80" stroke="#5d4037" stroke-width="4" stroke-linecap="round"/>
+    <path fill="#e53935" d="M-60,-2 Q-10,-55 40,-2 Q10,-15 -10,-12 Q-30,-15 -60,-2 Z"/>
+    <path fill="#c62828" d="M-60,-2 Q-10,-55 40,-2 Q10,-5 -10,-2 Z" opacity="0.4"/>
+    <!-- Stripe -->
+    <path fill="white" opacity="0.5" d="M-20,-42 Q-15,-50 -10,-42 Q-15,-28 -20,-42 Z"/>
+    <path fill="white" opacity="0.5" d="M10,-38 Q14,-46 18,-38 Q14,-26 10,-38 Z"/>
+  </g>
+
+  <!-- Starfish on sand -->
+  <g transform="translate(1100, 840)" fill="#e57373" opacity="0.7">
+    <polygon points="0,-10 2,-3 9,-3 4,2 6,9 0,5 -6,9 -4,2 -9,-3 -2,-3" transform="scale(1.4)"/>
+  </g>
+
+  <!-- Gentle sea reflection shimmer -->
+  <rect x="0" y="500" width="1440" height="300" fill="url(#seaGrad)" opacity="0" />
+  <path fill="rgba(255,255,255,0.06)"
+        d="M200,640 L220,636 L240,644 L260,638 L280,646 L260,650 L240,648 L220,650 Z"/>
+  <path fill="rgba(255,255,255,0.06)"
+        d="M900,660 L925,655 L950,663 L975,657 L1000,665 L975,670 L950,668 L925,670 Z"/>
+</svg>
