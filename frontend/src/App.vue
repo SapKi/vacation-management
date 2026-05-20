@@ -18,7 +18,7 @@
         </nav>
       </div>
     </header>
-    <main class="main-content">
+    <main :class="['main-content', { 'main-content--flush': route.path === '/' }]">
       <RouterView />
     </main>
   </div>
@@ -26,4 +26,6 @@
 
 <script setup lang="ts">
 import { CalendarRange, User, ClipboardList } from "lucide-vue-next";
+import { useRoute } from "vue-router";
+const route = useRoute();
 </script>
