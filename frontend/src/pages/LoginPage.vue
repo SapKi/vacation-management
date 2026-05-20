@@ -13,18 +13,18 @@
         <AlertCircle :size="14" stroke-width="2" /> {{ error }}
       </div>
 
-      <form @submit.prevent="submit" novalidate>
+      <form @submit.prevent="submit" novalidate autocomplete="off">
         <div class="lp-field">
           <label class="lp-label">Full name</label>
           <input v-model="form.name" type="text" class="lp-input" :class="{ 'lp-input--err': errors.name }"
-            placeholder="e.g. Alice Johnson" autocomplete="username" />
+            placeholder="e.g. Alice Johnson" autocomplete="off" />
           <span v-if="errors.name" class="lp-field-err">{{ errors.name }}</span>
         </div>
 
         <div class="lp-field">
           <label class="lp-label">Password</label>
           <input v-model="form.password" type="password" class="lp-input" :class="{ 'lp-input--err': errors.password }"
-            placeholder="••••••••" autocomplete="current-password" />
+            placeholder="••••••••" autocomplete="new-password" />
           <span v-if="errors.password" class="lp-field-err">{{ errors.password }}</span>
         </div>
 
@@ -140,10 +140,10 @@ async function submit() {
   border: 1px solid rgba(99,102,241,0.3);
   border-radius: 12px;
   display: flex; align-items: center; justify-content: center;
-  margin-bottom: 1.25rem; color: #818cf8;
+  margin: 0 auto 1.25rem; color: #818cf8;
 }
-.lp-title { font-size: 1.4rem; font-weight: 800; color: #f1f5f9; letter-spacing: -0.4px; margin-bottom: 0.3rem; }
-.lp-sub   { font-size: 0.82rem; color: #475569; margin-bottom: 1.5rem; }
+.lp-title { font-size: 1.4rem; font-weight: 800; color: #f1f5f9; letter-spacing: -0.4px; margin-bottom: 0.3rem; text-align: center; }
+.lp-sub   { font-size: 0.82rem; color: #475569; margin-bottom: 1.5rem; text-align: center; }
 
 .lp-error {
   display: flex; align-items: center; gap: 0.4rem;

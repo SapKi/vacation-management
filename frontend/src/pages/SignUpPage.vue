@@ -160,10 +160,10 @@ async function submit() {
   width: 48px; height: 48px; background: rgba(99,102,241,0.15);
   border: 1px solid rgba(99,102,241,0.3); border-radius: 12px;
   display: flex; align-items: center; justify-content: center;
-  margin-bottom: 1.25rem; color: #818cf8;
+  margin: 0 auto 1.25rem; color: #818cf8;
 }
-.sp-title { font-size: 1.4rem; font-weight: 800; color: #f1f5f9; letter-spacing: -0.4px; margin-bottom: 0.3rem; }
-.sp-sub   { font-size: 0.82rem; color: #475569; margin-bottom: 1.5rem; }
+.sp-title { font-size: 1.4rem; font-weight: 800; color: #f1f5f9; letter-spacing: -0.4px; margin-bottom: 0.3rem; text-align: center; }
+.sp-sub   { font-size: 0.82rem; color: #475569; margin-bottom: 1.5rem; text-align: center; }
 
 .sp-error {
   display: flex; align-items: center; gap: 0.4rem;
