@@ -3,7 +3,10 @@ import vue from "@vitejs/plugin-vue";
 
 export default defineConfig({
   plugins: [vue()],
-  server: {
-    port: 5173,
+  server: { port: 5173 },
+  test: {
+    environment: "jsdom",
+    globals: true,
+    include: ["src/**/*.test.ts"],
   },
-});
+} as any);

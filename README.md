@@ -1,127 +1,468 @@
-# Vacation Management Interface
+# Vacation Management Platform
 
-A full-stack web application for managing employee vacation requests. Employees submit requests, and managers approve or reject them with comments.
+A full-stack web application for managing employee vacation requests. Employees submit time-off requests; managers review, approve, or reject them — all from one workspace.
+
+---
+
+## Table of Contents
+
+1. [Overview](#overview)
+2. [Tech Stack](#tech-stack)
+3. [Architecture](#architecture)
+4. [Project Structure](#project-structure)
+5. [Database Schema](#database-schema)
+6. [API Reference](#api-reference)
+7. [Frontend Pages & Components](#frontend-pages--components)
+8. [State Management & Services](#state-management--services)
+9. [Environment Variables](#environment-variables)
+10. [Local Setup](#local-setup)
+11. [Seed Data](#seed-data)
+12. [Testing](#testing)
+13. [Design Decisions](#design-decisions)
+14. [Known Limitations](#known-limitations)
+
+---
+
+## Overview
+
+The platform supports two user roles:
+
+| Role | Capabilities |
+|---|---|
+| **Requester** | Submit vacation requests, view own history, edit or cancel pending requests |
+| **Validator** | View all employees' requests, filter by status, approve or reject with a comment |
+
+Sessions are stored in `localStorage`. There is no JWT — the user object is persisted directly after a successful login.
 
 ---
 
 ## Tech Stack
 
-| Layer      | Technology                     |
-|------------|-------------------------------|
-| Frontend   | Vue 3, Vue Router, Axios, Vite |
-| Backend    | Node.js, Express, TypeScript   |
-| Database   | PostgreSQL                     |
-| ORM        | TypeORM                        |
-| Tests      | Jest, Supertest, ts-jest       |
+### Backend
+
+| Layer | Technology |
+|---|---|
+| Runtime | Node.js |
+| Framework | Express 4 |
+| Language | TypeScript 5 |
+| ORM | TypeORM 0.3 |
+| Database | PostgreSQL |
+| Password hashing | bcryptjs |
+| Test runner | Jest 29 + ts-jest + Supertest |
+
+### Frontend
+
+| Layer | Technology |
+|---|---|
+| Framework | Vue 3 (Composition API, `<script setup>`) |
+| Language | TypeScript 5 |
+| Build tool | Vite 5 |
+| Routing | Vue Router 4 |
+| HTTP client | Axios |
+| Icons | Lucide Vue Next |
+| Fonts | Electrolize (body), Funnel Display (headings) — Google Fonts |
+| Test runner | Vitest 4 + @vue/test-utils |
 
 ---
 
-## Features
+## Architecture
 
-### Requester Interface (`/requester`)
-- Submit vacation requests (start date, end date, optional reason)
-- View your own request history with live status badges
-- Client-side and server-side validation with clear error messages
-- Loading, error, and empty states handled
+```
+┌─────────────────────────────────────┐
+│           Browser (Vue 3 SPA)        │
+│  Pages → Composables → Services     │
+│          ↓  Axios HTTP               │
+├─────────────────────────────────────┤
+│         Express REST API             │
+│  Routes → Controllers → Services    │
+│          ↓  TypeORM                  │
+├─────────────────────────────────────┤
+│           PostgreSQL                 │
+│   users   |   vacation_requests      │
+└─────────────────────────────────────┘
+```
 
-### Validator Interface (`/validator`)
-- View **all** vacation requests across all employees
-- Filter by status: All / Pending / Approved / Rejected
-- Approve a request with one click
-- Reject a request with a required comment (modal dialog)
-- Status badges, employee names, and date ranges shown clearly
+The backend exposes a REST API on port **3000**. The frontend dev server runs on port **5173** and calls the API directly via Axios (`baseURL = http://localhost:3000/api`).
 
 ---
 
-## Folder Structure
+## Project Structure
 
 ```
 vacation-management/
 ├── backend/
 │   ├── src/
-│   │   ├── app.ts                  # Express app setup
-│   │   ├── server.ts               # Entry point — connects DB and starts server
-│   │   ├── data-source.ts          # TypeORM DataSource config
-│   │   ├── entities/
-│   │   │   ├── User.ts
-│   │   │   └── VacationRequest.ts
-│   │   ├── routes/
-│   │   │   ├── vacationRequest.routes.ts
-│   │   │   └── user.routes.ts
 │   │   ├── controllers/
-│   │   │   └── vacationRequest.controller.ts
+│   │   │   ├── auth.controller.ts            # login, register handlers
+│   │   │   └── vacationRequest.controller.ts # vacation request handlers
 │   │   ├── services/
-│   │   │   └── vacationRequest.service.ts
+│   │   │   ├── auth.service.ts               # login/register business logic
+│   │   │   └── vacationRequest.service.ts    # CRUD + approve/reject logic
+│   │   ├── entities/
+│   │   │   ├── User.ts                       # TypeORM entity + UserRole enum
+│   │   │   └── VacationRequest.ts            # TypeORM entity + RequestStatus enum
+│   │   ├── routes/
+│   │   │   ├── auth.routes.ts                # POST /login, /register
+│   │   │   ├── vacationRequest.routes.ts     # vacation request endpoints
+│   │   │   └── user.routes.ts                # GET /users, /users/:id
 │   │   ├── middleware/
-│   │   │   └── errorHandler.ts
+│   │   │   └── errorHandler.ts               # centralised Express error handler
+│   │   ├── tests/
+│   │   │   ├── auth.service.test.ts          # unit tests (mocked DB)
+│   │   │   ├── auth.routes.test.ts           # integration tests (real DB)
+│   │   │   ├── vacationRequest.service.test.ts
+│   │   │   ├── vacationRequest.routes.test.ts
+│   │   │   └── vacationRequest.test.ts       # original integration tests
 │   │   ├── seed/
-│   │   │   └── seed.ts
-│   │   └── tests/
-│   │       └── vacationRequest.test.ts
-│   ├── package.json
-│   ├── tsconfig.json
+│   │   │   └── seed.ts                       # wipes and re-seeds demo data
+│   │   ├── app.ts                            # Express app + route mounting
+│   │   ├── data-source.ts                    # TypeORM DataSource config
+│   │   └── server.ts                         # HTTP server entry point
 │   ├── jest.config.js
-│   └── .env.example
+│   ├── tsconfig.json
+│   └── package.json
 │
 └── frontend/
     ├── src/
-    │   ├── main.ts
-    │   ├── App.vue
-    │   ├── router/
-    │   │   └── index.ts
-    │   ├── services/
-    │   │   ├── api.ts              # Axios client
-    │   │   └── vacationRequestsApi.ts
     │   ├── pages/
-    │   │   ├── RequesterPage.vue
-    │   │   └── ValidatorPage.vue
+    │   │   ├── HomePage.vue          # landing page with login/switch CTA
+    │   │   ├── LoginPage.vue         # sign-in form
+    │   │   ├── SignUpPage.vue        # registration form
+    │   │   ├── RequesterPage.vue     # employee dashboard
+    │   │   └── ValidatorPage.vue     # manager dashboard
     │   ├── components/
-    │   │   ├── VacationRequestForm.vue
-    │   │   ├── VacationRequestList.vue
-    │   │   ├── VacationRequestCard.vue
-    │   │   ├── StatusBadge.vue
-    │   │   ├── StatusFilter.vue
-    │   │   └── RejectModal.vue
+    │   │   ├── VacationRequestForm.vue    # create/submit request form
+    │   │   ├── VacationRequestList.vue    # list with filter bar
+    │   │   ├── VacationRequestCard.vue    # single request card
+    │   │   ├── StatusBadge.vue            # Pending/Approved/Rejected pill
+    │   │   ├── StatusFilter.vue           # filter tabs (All/Pending/…)
+    │   │   ├── EditRequestModal.vue       # edit dates/reason of pending request
+    │   │   ├── CancelModal.vue            # confirm hard delete
+    │   │   ├── RejectModal.vue            # reject with required comment
+    │   │   └── VacationDeco.vue           # decorative background SVG icons
+    │   ├── composables/
+    │   │   └── useAuth.ts            # reactive auth state (module-level ref)
+    │   ├── services/
+    │   │   ├── api.ts                # Axios instance (baseURL from env)
+    │   │   ├── auth.ts               # login/register + localStorage helpers
+    │   │   └── vacationRequestsApi.ts
+    │   ├── utils/
+    │   │   ├── date.ts               # formatDate, formatRelative, daysBetween
+    │   │   └── error.ts              # getApiError (extracts Axios error message)
+    │   ├── constants/
+    │   │   └── index.ts              # enums, ROUTES, roleToRoute, STATUS_FILTER_OPTIONS
+    │   ├── router/
+    │   │   └── index.ts              # Vue Router with navigation guards
     │   └── styles/
-    │       └── main.css
-    ├── index.html
-    ├── package.json
+    │       └── main.css              # global design tokens + component styles
     ├── vite.config.ts
-    └── .env.example
+    ├── tsconfig.json
+    └── package.json
 ```
 
 ---
 
-## Database Setup
+## Database Schema
 
-You need a running PostgreSQL instance (version 13+).
+### `users`
 
-### 1. Create the database
+| Column | Type | Notes |
+|---|---|---|
+| `id` | serial PK | auto-incremented |
+| `name` | varchar | unique display name, used as the login identifier |
+| `role` | enum | `Requester` \| `Validator` |
+| `password_hash` | text | bcrypt hash; `select: false` — never returned in standard queries |
 
-```sql
--- Connect to PostgreSQL as a superuser and run:
-CREATE DATABASE vacation_management;
+### `vacation_requests`
+
+| Column | Type | Notes |
+|---|---|---|
+| `id` | serial PK | |
+| `user_id` | int FK → users.id | |
+| `start_date` | date | |
+| `end_date` | date | must be ≥ start_date |
+| `reason` | text nullable | optional free-text reason from employee |
+| `status` | enum | `Pending` \| `Approved` \| `Rejected` — defaults to `Pending` |
+| `comments` | text nullable | required when rejecting; written by the validator |
+| `created_at` | timestamptz | auto-set by TypeORM `@CreateDateColumn` |
+
+> `synchronize: true` is enabled — TypeORM updates the schema automatically on server start. **Disable this before any production deployment.**
+
+---
+
+## API Reference
+
+**Base URL:** `http://localhost:3000/api`
+
+All error responses use the shape: `{ "error": "message string" }`
+
+---
+
+### Auth — `/api/auth`
+
+#### `POST /api/auth/register`
+Creates a new user account.
+
+**Request body:**
+```json
+{
+  "name": "Alice Johnson",
+  "role": "Requester",
+  "password": "alice123"
+}
 ```
 
-Using psql:
-```bash
-psql -U postgres -c "CREATE DATABASE vacation_management;"
+| Status | Meaning |
+|---|---|
+| 201 | User created — returns user object (no `password_hash`) |
+| 400 | Missing name / role / password shorter than 4 characters |
+| 409 | Name already taken |
+
+---
+
+#### `POST /api/auth/login`
+Authenticates an existing user.
+
+**Request body:**
+```json
+{
+  "name": "Alice Johnson",
+  "password": "alice123"
+}
+```
+
+| Status | Meaning |
+|---|---|
+| 200 | Login successful — returns user object (no `password_hash`) |
+| 400 | Missing name or password |
+| 401 | Invalid name or password |
+
+---
+
+### Users — `/api/users`
+
+#### `GET /api/users`
+Returns all users (without `password_hash`).
+
+#### `GET /api/users/:id`
+Returns a single user by ID.
+
+| Status | Meaning |
+|---|---|
+| 200 | User found |
+| 404 | User not found |
+
+---
+
+### Vacation Requests — `/api/vacation-requests`
+
+#### `POST /api/vacation-requests`
+Creates a new vacation request. Status defaults to `Pending`.
+
+**Request body:**
+```json
+{
+  "userId": 1,
+  "startDate": "2026-09-01",
+  "endDate": "2026-09-05",
+  "reason": "Summer holiday"
+}
+```
+
+| Status | Meaning |
+|---|---|
+| 201 | Request created |
+| 400 | Missing userId / startDate / endDate, or endDate < startDate |
+| 404 | User not found |
+
+---
+
+#### `GET /api/vacation-requests`
+Returns all requests. Optionally filter by status.
+
+**Query params:** `?status=Pending` | `Approved` | `Rejected`
+
+Invalid status values are ignored and all requests are returned. Includes the `user` relation (id, name, role).
+
+---
+
+#### `GET /api/vacation-requests/user/:userId`
+Returns all requests belonging to a specific user, ordered by `created_at DESC`.
+
+---
+
+#### `PATCH /api/vacation-requests/:id`
+Updates `startDate`, `endDate`, and/or `reason` on a **Pending** request only.
+
+| Status | Meaning |
+|---|---|
+| 200 | Updated — returns updated request |
+| 400 | Request is not Pending, or new endDate < startDate |
+| 404 | Request not found |
+
+---
+
+#### `PATCH /api/vacation-requests/:id/approve`
+Sets status to `Approved`.
+
+| Status | Meaning |
+|---|---|
+| 200 | Approved — returns updated request |
+| 404 | Request not found |
+
+---
+
+#### `PATCH /api/vacation-requests/:id/reject`
+Sets status to `Rejected` and stores the validator's comment.
+
+**Request body:**
+```json
+{ "comments": "Too many absences that week" }
+```
+
+| Status | Meaning |
+|---|---|
+| 200 | Rejected — returns updated request |
+| 400 | `comments` is missing or blank |
+| 404 | Request not found |
+
+---
+
+#### `DELETE /api/vacation-requests/:id`
+Permanently deletes a **Pending** request (hard delete — no restore).
+
+| Status | Meaning |
+|---|---|
+| 204 | Deleted |
+| 400 | Request is not Pending |
+| 404 | Request not found |
+
+---
+
+#### `GET /api/health`
+Returns `{ "status": "ok" }`. Used to verify the server is running.
+
+---
+
+## Frontend Pages & Components
+
+### Pages
+
+| Page | Route | Access |
+|---|---|---|
+| `HomePage` | `/` | Public — landing with "Continue" or "Sign In" CTA |
+| `LoginPage` | `/login` | Public |
+| `SignUpPage` | `/signup` | Public |
+| `RequesterPage` | `/requester` | Requires login |
+| `ValidatorPage` | `/validator` | Requires login |
+
+Navigation guards in `router/index.ts` redirect unauthenticated users to `/login` when accessing protected routes.
+
+### Component Responsibilities
+
+**`VacationRequestForm`** — date pickers for start/end + optional reason textarea. Client-side validation ensures end ≥ start before submitting.
+
+**`VacationRequestList`** — renders a `StatusFilter` bar followed by a list of `VacationRequestCard` components. Accepts props: `:requests`, `:loading`, `:error`, `:show-edit`, `:show-cancel`, `:show-approve`, `:show-reject`.
+
+**`VacationRequestCard`** — displays dates, duration in days, employee name, relative submission time ("Submitted today"), optional reason, optional manager note. Shows action buttons based on props.
+
+**`EditRequestModal`** — modal dialog for editing start/end/reason of a pending request.
+
+**`CancelModal`** — confirmation dialog for hard-deleting a pending request, shows a summary of what will be removed.
+
+**`RejectModal`** — requires a non-empty comment before allowing rejection.
+
+**`StatusBadge`** — colour-coded pill badge: yellow = Pending, green = Approved, red = Rejected.
+
+**`StatusFilter`** — tab bar for All / Pending / Approved / Rejected. Emits the selected filter to the parent.
+
+**`VacationDeco`** — `position: fixed; z-index: 0` layer of 13 small neon vacation-themed icons (camera, sunglasses, sun, airplane, palm tree, cocktail, waves, beach umbrella, ticket, flip flops, suitcase, map pin, binoculars). Uses CSS `drop-shadow` for neon glow. Purely decorative, `pointer-events: none`.
+
+---
+
+## State Management & Services
+
+### `useAuth` composable
+
+**File:** `src/composables/useAuth.ts`
+
+A module-level `ref<AuthUser | null>` is initialised from `localStorage` when the module first loads. All components share the same reactive reference.
+
+```ts
+const { currentUser, isLoggedIn, isRequester, isValidator, setUser, logout } = useAuth();
+```
+
+| Property / Method | Description |
+|---|---|
+| `currentUser` | Reactive ref — the logged-in user or `null` |
+| `isLoggedIn` | Computed — `!!currentUser.value` |
+| `isRequester` | Computed — role is `Requester` |
+| `isValidator` | Computed — role is `Validator` |
+| `setUser(user)` | Saves to localStorage + updates ref |
+| `logout()` | Clears localStorage + nulls ref |
+
+---
+
+### `authService`
+
+**File:** `src/services/auth.ts`
+
+| Method | Description |
+|---|---|
+| `login(name, password)` | POST /auth/login |
+| `register(payload)` | POST /auth/register |
+| `save(user)` | Write user to `localStorage` key `vm_user` |
+| `get()` | Parse and return `vm_user` from localStorage, or `null` |
+| `clear()` | Remove `vm_user` from localStorage |
+| `isLoggedIn()` | Returns `!!localStorage.getItem("vm_user")` |
+
+---
+
+### `vacationRequestsApi`
+
+**File:** `src/services/vacationRequestsApi.ts`
+
+| Method | HTTP call |
+|---|---|
+| `create(payload)` | POST /vacation-requests |
+| `getByUser(userId)` | GET /vacation-requests/user/:userId |
+| `getAll(status?)` | GET /vacation-requests[?status=…] |
+| `update(id, payload)` | PATCH /vacation-requests/:id |
+| `cancel(id)` | DELETE /vacation-requests/:id |
+| `approve(id)` | PATCH /vacation-requests/:id/approve |
+| `reject(id, comments)` | PATCH /vacation-requests/:id/reject |
+
+---
+
+### Utility functions
+
+**`src/utils/date.ts`**
+
+```ts
+formatDate(dateStr: string): string
+// "2026-09-01" → "Sep 1, 2026"
+
+formatRelative(dateStr: string): string
+// → "Submitted today" | "Submitted yesterday" | "Submitted 3 days ago" | "Jun 1"
+
+daysBetween(startDate: string, endDate: string): number
+// inclusive — daysBetween("2026-09-01", "2026-09-05") === 5
+```
+
+**`src/utils/error.ts`**
+
+```ts
+getApiError(err: unknown, fallback?: string): string
+// Extracts err.response.data.error (Axios), falls back to err.message, then fallback string
 ```
 
 ---
 
 ## Environment Variables
 
-### Backend (`backend/.env`)
-
-Copy the example and fill in your credentials:
-
-```bash
-cp backend/.env.example backend/.env
-```
+### Backend — `backend/.env`
 
 ```env
-PORT=3000
 DB_HOST=localhost
 DB_PORT=5432
 DB_USERNAME=postgres
@@ -129,171 +470,143 @@ DB_PASSWORD=postgres
 DB_NAME=vacation_management
 ```
 
-### Frontend (`frontend/.env`)
+All values have defaults in `data-source.ts` — the server starts without a `.env` file in development.
 
-```bash
-cp frontend/.env.example frontend/.env
-```
+### Frontend — `frontend/.env`
 
 ```env
 VITE_API_BASE_URL=http://localhost:3000/api
 ```
 
+If not set, Axios defaults to `http://localhost:3000/api`.
+
 ---
 
-## How to Install
+## Local Setup
 
-### Backend
+### Prerequisites
+
+- Node.js 18+
+- PostgreSQL 14+ running locally
+
+### 1. Create the database
+
+```bash
+psql -U postgres -c "CREATE DATABASE vacation_management;"
+```
+
+### 2. Start the backend
 
 ```bash
 cd backend
 npm install
-```
-
-### Frontend
-
-```bash
-cd frontend
-npm install
-```
-
----
-
-## How to Run
-
-### 1. Start the backend
-
-```bash
-cd backend
 npm run dev
+# → http://localhost:3000
 ```
 
-Server starts at `http://localhost:3000`.  
-TypeORM creates/syncs tables automatically on first run.
+TypeORM `synchronize: true` creates the `users` and `vacation_requests` tables automatically on first start.
 
-### 2. Seed the database
-
-In a second terminal:
+### 3. Seed demo data
 
 ```bash
 cd backend
 npm run seed
 ```
 
-This inserts test users and sample vacation requests.
+Wipes all existing data and creates two demo users plus 3 sample requests (see [Seed Data](#seed-data) below).
 
-### 3. Start the frontend
+### 4. Start the frontend
 
 ```bash
 cd frontend
+npm install
 npm run dev
+# → http://localhost:5173
 ```
-
-Frontend runs at `http://localhost:5173`.
-
-Open your browser:
-- **Requester view**: http://localhost:5173/requester
-- **Validator view**: http://localhost:5173/validator
 
 ---
 
-## How to Run Tests
+## Seed Data
 
-Tests use the real PostgreSQL database (same `.env`). Make sure the database is running and `.env` is configured.
+| User | Role | Password |
+|---|---|---|
+| Alice Johnson | Requester | `alice123` |
+| Bob Smith | Validator | `bob123` |
+
+**Sample vacation requests (Alice Johnson):**
+
+| Dates | Reason | Status |
+|---|---|---|
+| Jun 1 – Jun 5, 2026 | Summer vacation | Pending |
+| Jul 10 – Jul 15, 2026 | Family trip | Approved |
+| Aug 20 – Aug 22, 2026 | Personal days | Rejected — "Too many employees absent that week" |
+
+---
+
+## Testing
+
+### Backend (Jest + Supertest)
 
 ```bash
 cd backend
 npm test
 ```
 
-Tests clean up after themselves — they create a test user, run assertions, then delete all test data.
+**5 suites — 63 tests — all passing**
 
----
+| Suite | Type | What it covers |
+|---|---|---|
+| `auth.service.test.ts` | Unit (mocked DB) | `AuthService.login` + `.register` — all validation branches |
+| `vacationRequest.service.test.ts` | Unit (mocked DB) | All 6 service methods with every error guard |
+| `auth.routes.test.ts` | Integration (real DB) | POST /auth/register + /auth/login — all status codes |
+| `vacationRequest.routes.test.ts` | Integration (real DB) | GET all, PATCH update, PATCH reject, DELETE — all guards |
+| `vacationRequest.test.ts` | Integration (real DB) | POST create, PATCH approve/reject, GET by user |
 
-## Seed Data Explanation
+Unit tests mock `AppDataSource.getRepository` with Jest — no database connection required.
+Integration tests require a running PostgreSQL instance and clean up all test rows after each suite.
 
-Running `npm run seed` inserts:
-
-| Type      | Name           | ID | Role      |
-|-----------|----------------|----|-----------|
-| User      | Alice Johnson  | 1  | Requester |
-| User      | Bob Smith      | 2  | Validator |
-
-And 3 vacation requests for Alice:
-
-| Start      | End        | Status   | Reason          |
-|------------|------------|----------|-----------------|
-| 2026-06-01 | 2026-06-05 | Pending  | Summer vacation |
-| 2026-07-10 | 2026-07-15 | Approved | Family trip     |
-| 2026-08-20 | 2026-08-22 | Rejected | Personal days   |
-
-> **Note:** The seed deletes all existing data before inserting. Run it only once, or re-run to reset to a clean state.
-
----
-
-## API Endpoints
-
-### Vacation Requests
-
-| Method | Endpoint                              | Description                           |
-|--------|---------------------------------------|---------------------------------------|
-| POST   | `/api/vacation-requests`              | Submit a new vacation request         |
-| GET    | `/api/vacation-requests`              | Get all requests (optional `?status=Pending`) |
-| GET    | `/api/vacation-requests/user/:userId` | Get requests for a specific user      |
-| PATCH  | `/api/vacation-requests/:id/approve`  | Approve a request                     |
-| PATCH  | `/api/vacation-requests/:id/reject`   | Reject a request (body: `{ comments }`) |
-
-### Users
-
-| Method | Endpoint         | Description      |
-|--------|------------------|------------------|
-| GET    | `/api/users`     | List all users   |
-| GET    | `/api/users/:id` | Get user by id   |
-
-### Example: Submit a request
+### Frontend (Vitest)
 
 ```bash
-curl -X POST http://localhost:3000/api/vacation-requests \
-  -H "Content-Type: application/json" \
-  -d '{"userId":1,"startDate":"2026-06-10","endDate":"2026-06-14","reason":"Holiday"}'
+cd frontend
+npm test
 ```
 
-### Example: Reject a request
+**5 suites — 47 tests — all passing**
 
-```bash
-curl -X PATCH http://localhost:3000/api/vacation-requests/1/reject \
-  -H "Content-Type: application/json" \
-  -d '{"comments":"Too many absences that week"}'
-```
+| Suite | What it covers |
+|---|---|
+| `utils/date.test.ts` | `formatDate`, `formatRelative` (vi.useFakeTimers), `daysBetween`, `MS_PER_DAY` |
+| `utils/error.test.ts` | `getApiError` — Axios shape, plain Error, null, string, custom fallback |
+| `services/auth.test.ts` | `authService` localStorage operations (save, get, clear, isLoggedIn) |
+| `composables/useAuth.test.ts` | `setUser`, `logout`, `isRequester`, `isValidator`, initial state from localStorage |
+| `constants/index.test.ts` | Enum values, ROUTES constants, `roleToRoute`, `STATUS_FILTER_OPTIONS` |
 
 ---
 
-## Technical Decisions
+## Design Decisions
 
-### Why TypeORM with `synchronize: true`?
-For a local assignment, auto-sync removes the need to manage migrations manually. In production, you'd use migrations instead.
+**Cancel = hard delete.** Cancelled requests are permanently removed from the database. There is no "Cancelled" status and no restore flow. This keeps the state machine simple — only three statuses exist.
 
-### Why no authentication?
-The spec explicitly allows skipping auth. The requester page uses user ID 1 (hardcoded), and the validator uses user ID 2. This is documented clearly and keeps the app clean and testable.
+**`synchronize: true` in TypeORM.** The database schema auto-updates on every server start. Must be replaced with TypeORM migrations before any production deployment.
 
-### Controller → Service separation
-Controllers only parse HTTP input and call services. All business logic (validation, DB queries) lives in the service layer. This makes the service independently testable.
+**No JWT.** The user object is stored directly in `localStorage` after login. Acceptable for a demo; in production, use a signed JWT or a server-side session with a secure `httpOnly` cookie.
 
-### Centralized error handler
-A single Express error-handler middleware catches all thrown errors and returns consistent `{ error: "..." }` JSON responses with the correct HTTP status code.
+**Single source of truth for routes and role strings.** All route paths live in the `ROUTES` constant in `constants/index.ts`. All role strings live in the `UserRole` enum. No string literals are scattered through components.
 
-### Vue 3 Composition API
-All components use `<script setup>` with the Composition API for concise, type-safe components. No Options API was used.
+**`password_hash` is `select: false`.** TypeORM never includes the column in standard repository queries. `AuthService.login` uses a QueryBuilder with `.addSelect("u.password_hash")` to fetch it only for the bcrypt comparison.
 
-### Axios service layer
-All API calls are encapsulated in `vacationRequestsApi.ts`. Components never import Axios directly — they call functions from the service. This makes it trivial to mock or swap the API layer.
+**Role-aware navigation.** The header shows only the link relevant to the current user's role, plus a "Switch to [other role]" button that logs the current user out and redirects to `/login`. Neither role can navigate to the other's dashboard through the UI.
+
+**Background decoration is a fixed layer at `z-index: 0`.** All page content sits at `z-index: 1` (via `.main-content`) so the icons are always behind interactive elements without needing per-component z-index management.
 
 ---
 
 ## Known Limitations
 
-- **No authentication** — user identity is hardcoded. In production, use JWT or sessions.
-- **Single requester** — the form always submits as user ID 1. A real app would use the logged-in user's ID.
-- **`synchronize: true`** — convenient for dev/demo, but should use migrations in production.
-- **No pagination** — the validator list fetches all requests at once. Fine for a small dataset, but would need pagination at scale.
-- **Tests require a live database** — integration tests hit real PostgreSQL. Mocking the DB would speed up the test suite but was skipped for simplicity.
+- Session is not invalidated server-side on logout — the token / stored object is simply removed from the client.
+- No pagination — the validator view loads all requests at once.
+- No role-based protection on the API — any client can call any endpoint without authentication.
+- `synchronize: true` must be disabled before any production deployment.
+- No email or in-app notifications for status changes.
+- No support for partial-day or recurring requests.

@@ -4,7 +4,9 @@
       "PowerShell(Test-NetConnection -ComputerName localhost -Port 5173 -InformationLevel Quiet -WarningAction SilentlyContinue)",
       "PowerShell($r = Invoke-RestMethod -Uri \"http://localhost:3000/api/vacation-requests\" -ErrorAction Stop; \"Requests count: $\\($r.Count\\)\"; $r | Select-Object id, status, start_date, end_date | Format-Table)",
       "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\sapir\\\\Desktop\\\\vacation-management\\\\frontend\\\\src\" -Recurse -File)",
-      "Bash(Select-Object FullName)"
+      "Bash(Select-Object FullName)",
+      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\sapir\\\\Desktop\\\\vacation-management\" -Force)",
+      "Bash(Test-Path \"c:\\\\Users\\\\sapir\\\\Desktop\\\\vacation-management\\\\README.md\")"
     ]
   }
 }
