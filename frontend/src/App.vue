@@ -11,14 +11,26 @@
         <div class="header-right">
           <template v-if="isLoggedIn">
             <nav class="nav">
-              <RouterLink :to="ROUTES.REQUESTER" class="nav-link" active-class="active">
-                <User :size="15" stroke-width="2" />
-                My Requests
-              </RouterLink>
-              <RouterLink :to="ROUTES.VALIDATOR" class="nav-link" active-class="active">
-                <ClipboardList :size="15" stroke-width="2" />
-                Manage Requests
-              </RouterLink>
+              <template v-if="currentUser!.role === UserRole.REQUESTER">
+                <RouterLink :to="ROUTES.REQUESTER" class="nav-link" active-class="active">
+                  <User :size="15" stroke-width="2" />
+                  My Requests
+                </RouterLink>
+                <button class="nav-switch" @click="handleSwitchRole" title="Switch to Validator account">
+                  <ArrowLeftRight :size="13" stroke-width="2" />
+                  Switch to Validator
+                </button>
+              </template>
+              <template v-else>
+                <RouterLink :to="ROUTES.VALIDATOR" class="nav-link" active-class="active">
+                  <ClipboardList :size="15" stroke-width="2" />
+                  Manage Requests
+                </RouterLink>
+                <button class="nav-switch" @click="handleSwitchRole" title="Switch to Requester account">
+                  <ArrowLeftRight :size="13" stroke-width="2" />
+                  Switch to Requester
+                </button>
+              </template>
             </nav>
 
             <div class="header-divider" />
@@ -45,9 +57,9 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { CalendarRange, User, ClipboardList, LogOut } from "lucide-vue-next";
+import { CalendarRange, User, ClipboardList, LogOut, ArrowLeftRight } from "lucide-vue-next";
 import { useAuth } from "./composables/useAuth";
-import { ROUTES } from "./constants";
+import { ROUTES, UserRole } from "./constants";
 import VacationDeco from "./components/VacationDeco.vue";
 
 const route  = useRoute();
@@ -59,6 +71,11 @@ const isFlush = computed(() =>
 );
 
 function handleLogout() {
+  logout();
+  router.push(ROUTES.LOGIN);
+}
+
+function handleSwitchRole() {
   logout();
   router.push(ROUTES.LOGIN);
 }
