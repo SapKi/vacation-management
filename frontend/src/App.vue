@@ -1,5 +1,6 @@
 <template>
   <div class="app">
+    <VacationDeco />
     <header class="app-header">
       <div class="header-content">
         <RouterLink :to="ROUTES.HOME" class="logo">
@@ -47,6 +48,7 @@ import { useRoute, useRouter } from "vue-router";
 import { CalendarRange, User, ClipboardList, LogOut } from "lucide-vue-next";
 import { useAuth } from "./composables/useAuth";
 import { ROUTES } from "./constants";
+import VacationDeco from "./components/VacationDeco.vue";
 
 const route  = useRoute();
 const router = useRouter();

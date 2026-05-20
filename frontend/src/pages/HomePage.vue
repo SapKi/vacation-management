@@ -77,8 +77,8 @@ function switchAccount() {
 <style scoped>
 .hp {
   position: relative;
+  z-index: 1;
   min-height: calc(100vh - 58px);
-  background: #060b18;
   display: flex;
   align-items: center;
   justify-content: center;
