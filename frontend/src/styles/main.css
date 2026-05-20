@@ -99,6 +99,13 @@ body {
 /* ── Page Header ───────────────────────────────────── */
 .page-header {
   margin-bottom: 1.5rem;
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 12px;
+  padding: 1.1rem 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
 }
 
 .page-title {
@@ -108,7 +115,7 @@ body {
 }
 
 .page-subtitle {
-  color: #64748b;
+  color: #475569;
   font-size: 0.9rem;
   margin-top: 0.25rem;
 }
