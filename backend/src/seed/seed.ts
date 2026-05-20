@@ -14,8 +14,8 @@ async function seed() {
   const requestRepo = AppDataSource.getRepository(VacationRequest);
 
   // Clear in correct order (child first)
-  await requestRepo.delete({});
-  await userRepo.delete({});
+  await requestRepo.createQueryBuilder().delete().execute();
+  await userRepo.createQueryBuilder().delete().execute();
 
   // Create users (IDs are auto-assigned — requester will be 1, validator 2 after reset)
   const requester = userRepo.create({
