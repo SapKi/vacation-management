@@ -24,6 +24,7 @@
         <div class="hp-session">
           <span class="hp-session-avatar">{{ currentUser!.name[0] }}</span>
           <div class="hp-session-info">
+            <span class="hp-session-label">you are logged in as:</span>
             <span class="hp-session-name">{{ currentUser!.name }}</span>
             <span class="hp-session-role">{{ currentUser!.role }}</span>
           </div>
@@ -145,6 +146,7 @@ function switchAccount() {
 }
 
 .hp-headline {
+  font-family: "Funnel Display", sans-serif;
   font-size: clamp(2.8rem, 6vw, 4.2rem);
   font-weight: 800;
   color: #f1f5f9;
@@ -172,30 +174,31 @@ function switchAccount() {
 .hp-session {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 1.1rem;
   background: rgba(255,255,255,0.04);
   border: 1px solid rgba(99,102,241,0.25);
-  border-radius: 12px;
-  padding: 0.7rem 1.1rem;
+  border-radius: 16px;
+  padding: 1.2rem 1.75rem;
   margin-bottom: 1.5rem;
 }
 
 .hp-session-avatar {
-  width: 36px; height: 36px;
+  width: 52px; height: 52px;
   border-radius: 50%;
   background: rgba(99,102,241,0.2);
   border: 1px solid rgba(99,102,241,0.4);
   color: #a5b4fc;
-  font-size: 0.85rem;
+  font-size: 1.2rem;
   font-weight: 800;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.hp-session-info { display: flex; flex-direction: column; text-align: left; }
-.hp-session-name { font-size: 0.875rem; font-weight: 700; color: #e2e8f0; }
-.hp-session-role { font-size: 0.72rem; color: #475569; }
+.hp-session-info { display: flex; flex-direction: column; text-align: left; gap: 0.15rem; }
+.hp-session-label { font-size: 0.75rem; font-weight: 400; color: #94a3b8; letter-spacing: 0.2px; }
+.hp-session-name { font-size: 1.15rem; font-weight: 700; color: #e2e8f0; }
+.hp-session-role { font-size: 0.875rem; color: #94a3b8; }
 
 /* Buttons */
 .hp-actions {
@@ -222,13 +225,13 @@ function switchAccount() {
 }
 
 .hp-btn--primary {
-  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-  color: #fff;
-  box-shadow: 0 0 0 1px rgba(99,102,241,0.4), 0 4px 20px rgba(99,102,241,0.35);
+  background: linear-gradient(135deg, #ccb800 0%, #ffe600 100%);
+  color: #0d1117;
+  box-shadow: 0 0 0 1px rgba(255,230,0,0.4), 0 4px 20px rgba(255,230,0,0.3);
 }
 .hp-btn--primary:hover {
-  background: linear-gradient(135deg, #4338ca 0%, #6d28d9 100%);
-  box-shadow: 0 0 0 1px rgba(99,102,241,0.5), 0 6px 28px rgba(99,102,241,0.5);
+  background: linear-gradient(135deg, #ffe600 0%, #fff176 100%);
+  box-shadow: 0 0 0 1px rgba(255,230,0,0.6), 0 6px 28px rgba(255,230,0,0.45);
   transform: translateY(-2px);
 }
 
@@ -237,16 +240,16 @@ function switchAccount() {
 
 .hp-btn--ghost {
   background-image: linear-gradient(rgba(15,23,42,0.6), rgba(15,23,42,0.6)),
-                    linear-gradient(135deg, rgba(99,102,241,0.5), rgba(139,92,246,0.5));
+                    linear-gradient(135deg, rgba(255,230,0,0.4), rgba(204,184,0,0.4));
   background-origin: border-box;
   background-clip: padding-box, border-box;
   border: 1.5px solid transparent;
-  color: #94a3b8;
+  color: #ffe600;
 }
 .hp-btn--ghost:hover {
-  color: #e2e8f0;
-  background-image: linear-gradient(rgba(30,40,68,0.8), rgba(30,40,68,0.8)),
-                    linear-gradient(135deg, rgba(99,102,241,0.8), rgba(139,92,246,0.8));
+  color: #fff176;
+  background-image: linear-gradient(rgba(20,18,0,0.7), rgba(20,18,0,0.7)),
+                    linear-gradient(135deg, rgba(255,230,0,0.7), rgba(204,184,0,0.7));
   background-origin: border-box;
   background-clip: padding-box, border-box;
   transform: translateY(-2px);

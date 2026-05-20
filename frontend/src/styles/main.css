@@ -86,7 +86,7 @@ body {
   color: #f8fafc; text-decoration: none;
 }
 .logo svg { color: #818cf8; }
-.logo-text { color: #f8fafc; }
+.logo-text { color: #f8fafc; font-family: "Funnel Display", sans-serif; }
 
 /* ── Header right ──────────────────────────────────── */
 .header-right { display: flex; align-items: center; gap: 0.4rem; }
@@ -138,7 +138,7 @@ body {
   border: 1px solid rgba(99,102,241,0.2);
   box-shadow: var(--shadow-sm);
 }
-.page-title { font-size: 1.15rem; font-weight: 700; color: #f1f5f9; letter-spacing: -0.2px; line-height: 1.2; font-family: "Smooch Sans", sans-serif; }
+.page-title { font-size: 1.15rem; font-weight: 700; color: #f1f5f9; letter-spacing: -0.2px; line-height: 1.2; font-family: "Funnel Display", sans-serif; }
 .page-subtitle { color: var(--text-muted); font-size: 0.75rem; margin-top: 0.15rem; font-weight: 500; }
 
 /* ── Cards ─────────────────────────────────────────── */
@@ -337,7 +337,7 @@ body {
   padding: 0.875rem 1.25rem; border-bottom: 1px solid var(--border);
   display: flex; justify-content: space-between; align-items: center;
 }
-.modal-title { font-size: 0.875rem; font-weight: 700; color: var(--text); font-family: "Smooch Sans", sans-serif; }
+.modal-title { font-size: 0.875rem; font-weight: 700; color: var(--text); font-family: "Funnel Display", sans-serif; }
 .modal-close {
   background: none; border: none; cursor: pointer; color: var(--text-muted);
   padding: 0.2rem; border-radius: var(--radius-sm);
