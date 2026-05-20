@@ -17,25 +17,25 @@
         </div>
         <StatusBadge :status="request.status" />
       </div>
-
       <div v-if="request.reason" class="request-reason">{{ request.reason }}</div>
     </div>
 
-    <div v-if="request.status === 'Rejected' && request.comments" class="request-comments">
+    <div v-if="request.status === RequestStatus.REJECTED && request.comments" class="request-comments">
       <MessageSquare :size="13" stroke-width="2" style="flex-shrink:0; margin-top:1px" />
       <span><strong>Manager note:</strong> {{ request.comments }}</span>
     </div>
 
-    <div v-if="(showActions && request.status === 'Pending') || (showEdit && request.status === 'Pending')" class="request-actions">
-      <button
-        v-if="showEdit && request.status === 'Pending'"
-        class="btn btn-ghost btn-sm"
-        @click="$emit('edit', request.id)"
-      >
+    <div
+      v-if="request.status === RequestStatus.PENDING && (showActions || showEdit || showCancel)"
+      class="request-actions"
+    >
+      <button v-if="showEdit" class="btn btn-ghost btn-sm" @click="$emit('edit', request.id)">
         <Pencil :size="13" stroke-width="2.5" /> Edit
       </button>
-
-      <template v-if="showActions && request.status === 'Pending'">
+      <button v-if="showCancel" class="btn btn-ghost btn-sm" @click="$emit('cancel', request.id)">
+        <Ban :size="13" stroke-width="2.5" /> Cancel
+      </button>
+      <template v-if="showActions">
         <button class="btn btn-success btn-sm" :disabled="actionLoading" @click="$emit('approve', request.id)">
           <Check :size="13" stroke-width="3" /> Approve
         </button>
@@ -49,19 +49,26 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import { User, Check, X, MessageSquare, Pencil } from "lucide-vue-next";
+import { User, Check, X, MessageSquare, Pencil, Ban } from "lucide-vue-next";
 import StatusBadge from "./StatusBadge.vue";
 import type { VacationRequest } from "../services/vacationRequestsApi";
+import { RequestStatus } from "../constants";
 
 const props = defineProps<{
   request: VacationRequest;
   showActions?: boolean;
   showEmployee?: boolean;
   showEdit?: boolean;
+  showCancel?: boolean;
   actionLoading?: boolean;
 }>();
 
-defineEmits<{ approve: [id: number]; reject: [id: number]; edit: [id: number] }>();
+defineEmits<{
+  approve: [id: number];
+  reject:  [id: number];
+  edit:    [id: number];
+  cancel:  [id: number];
+}>();
 
 const dayCount = computed(() => {
   const start = new Date(props.request.start_date);
@@ -70,7 +77,9 @@ const dayCount = computed(() => {
 });
 
 function formatDate(d: string) {
-  return new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
+  return new Date(d).toLocaleDateString("en-US", {
+    month: "short", day: "numeric", year: "numeric", timeZone: "UTC",
+  });
 }
 
 function formatRelative(d: string) {

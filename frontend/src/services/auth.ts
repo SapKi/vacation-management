@@ -1,14 +1,15 @@
 import api from "./api";
+import { UserRole } from "../constants";
 
 export interface AuthUser {
   id: number;
   name: string;
-  role: "Requester" | "Validator";
+  role: UserRole;
 }
 
 export interface RegisterPayload {
   name: string;
-  role: "Requester" | "Validator";
+  role: UserRole;
   password: string;
 }
 

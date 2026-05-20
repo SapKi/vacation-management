@@ -1,4 +1,5 @@
 import api from "./api";
+import { UserRole, RequestStatus } from "../constants";
 
 export interface VacationRequest {
   id: number;
@@ -6,10 +7,10 @@ export interface VacationRequest {
   start_date: string;
   end_date: string;
   reason?: string;
-  status: "Pending" | "Approved" | "Rejected";
+  status: RequestStatus;
   comments?: string;
   created_at: string;
-  user?: { id: number; name: string; role: string };
+  user?: { id: number; name: string; role: UserRole };
 }
 
 export interface CreateRequestPayload {
@@ -30,7 +31,7 @@ export const vacationRequestsApi = {
 
   getAll(status?: string) {
     return api.get<VacationRequest[]>("/vacation-requests", {
-      params: status && status !== "All" ? { status } : {},
+      params: status ? { status } : {},
     });
   },
 
@@ -38,13 +39,15 @@ export const vacationRequestsApi = {
     return api.patch<VacationRequest>(`/vacation-requests/${id}`, payload);
   },
 
+  cancel(id: number) {
+    return api.patch<VacationRequest>(`/vacation-requests/${id}/cancel`);
+  },
+
   approve(id: number) {
     return api.patch<VacationRequest>(`/vacation-requests/${id}/approve`);
   },
 
   reject(id: number, comments: string) {
-    return api.patch<VacationRequest>(`/vacation-requests/${id}/reject`, {
-      comments,
-    });
+    return api.patch<VacationRequest>(`/vacation-requests/${id}/reject`, { comments });
   },
 };

@@ -37,7 +37,7 @@
 
       <div class="lp-footer">
         Don't have an account?
-        <RouterLink to="/signup" class="lp-link">Create one</RouterLink>
+        <RouterLink :to="ROUTES.SIGNUP" class="lp-link">Create one</RouterLink>
       </div>
 
       <!-- Demo hint -->
@@ -61,7 +61,9 @@ import { reactive, ref } from "vue";
 import { useRouter } from "vue-router";
 import { CalendarRange, AlertCircle, ArrowRight } from "lucide-vue-next";
 import { authService } from "../services/auth";
-import { useAuth } from "../composables/useAuth";
+import { useAuth }     from "../composables/useAuth";
+import { ROUTES, roleToRoute } from "../constants";
+import { getApiError } from "../utils/error";
 
 const router = useRouter();
 const { setUser } = useAuth();
@@ -90,9 +92,9 @@ async function submit() {
   try {
     const { data } = await authService.login(form.name.trim(), form.password);
     setUser(data);
-    router.push(data.role === "Requester" ? "/requester" : "/validator");
-  } catch (err: any) {
-    error.value = err?.response?.data?.error || "Sign in failed. Please try again.";
+    router.push(roleToRoute(data.role));
+  } catch (err: unknown) {
+    error.value = getApiError(err, "Sign in failed. Please try again.");
   } finally {
     loading.value = false;
   }

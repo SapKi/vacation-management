@@ -2,7 +2,7 @@
   <div class="app">
     <header class="app-header">
       <div class="header-content">
-        <RouterLink to="/" class="logo">
+        <RouterLink :to="ROUTES.HOME" class="logo">
           <CalendarRange :size="22" stroke-width="2" />
           <span class="logo-text">Vacation Manager</span>
         </RouterLink>
@@ -10,11 +10,11 @@
         <div class="header-right">
           <template v-if="isLoggedIn">
             <nav class="nav">
-              <RouterLink to="/requester" class="nav-link" active-class="active">
+              <RouterLink :to="ROUTES.REQUESTER" class="nav-link" active-class="active">
                 <User :size="15" stroke-width="2" />
                 My Requests
               </RouterLink>
-              <RouterLink to="/validator" class="nav-link" active-class="active">
+              <RouterLink :to="ROUTES.VALIDATOR" class="nav-link" active-class="active">
                 <ClipboardList :size="15" stroke-width="2" />
                 Manage Requests
               </RouterLink>
@@ -46,15 +46,18 @@ import { computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { CalendarRange, User, ClipboardList, LogOut } from "lucide-vue-next";
 import { useAuth } from "./composables/useAuth";
+import { ROUTES } from "./constants";
 
 const route  = useRoute();
 const router = useRouter();
 const { currentUser, isLoggedIn, logout } = useAuth();
 
-const isFlush = computed(() => route.path === "/" || route.path === "/login");
+const isFlush = computed(() =>
+  route.path === ROUTES.HOME || route.path === ROUTES.LOGIN || route.path === ROUTES.SIGNUP
+);
 
 function handleLogout() {
   logout();
-  router.push("/login");
+  router.push(ROUTES.LOGIN);
 }
 </script>

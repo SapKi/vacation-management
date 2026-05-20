@@ -29,7 +29,7 @@
           </div>
         </div>
         <div class="hp-actions">
-          <RouterLink :to="currentUser!.role === 'Requester' ? '/requester' : '/validator'" class="hp-btn hp-btn--primary">
+          <RouterLink :to="roleToRoute(currentUser!.role)" class="hp-btn hp-btn--primary">
             <ArrowRight :size="17" stroke-width="2" />
             Continue to Dashboard
           </RouterLink>
@@ -43,12 +43,12 @@
       <!-- Not logged in -->
       <template v-else>
         <div class="hp-actions">
-          <RouterLink to="/login" class="hp-btn hp-btn--primary">
+          <RouterLink :to="ROUTES.LOGIN" class="hp-btn hp-btn--primary">
             <LogIn :size="17" stroke-width="2" />
             Sign In
             <ChevronRight :size="15" stroke-width="2.5" class="hp-btn-arrow" />
           </RouterLink>
-          <RouterLink to="/signup" class="hp-btn hp-btn--ghost">
+          <RouterLink :to="ROUTES.SIGNUP" class="hp-btn hp-btn--ghost">
             <UserPlus :size="17" stroke-width="2" />
             Create Account
           </RouterLink>
@@ -61,14 +61,15 @@
 <script setup lang="ts">
 import { useRouter } from "vue-router";
 import { LogIn, UserPlus, ChevronRight, ArrowRight, RefreshCw } from "lucide-vue-next";
-import { useAuth } from "../composables/useAuth";
+import { useAuth }     from "../composables/useAuth";
+import { ROUTES, roleToRoute } from "../constants";
 
 const router = useRouter();
 const { currentUser, isLoggedIn, logout } = useAuth();
 
 function switchAccount() {
   logout();
-  router.push("/login");
+  router.push(ROUTES.LOGIN);
 }
 </script>
 

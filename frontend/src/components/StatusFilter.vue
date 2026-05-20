@@ -1,7 +1,7 @@
 <template>
   <div class="filter-bar">
     <button
-      v-for="option in options"
+      v-for="option in STATUS_FILTER_OPTIONS"
       :key="option"
       :class="['filter-btn', { active: modelValue === option }]"
       @click="$emit('update:modelValue', option)"
@@ -12,13 +12,8 @@
 </template>
 
 <script setup lang="ts">
-defineProps<{
-  modelValue: string;
-}>();
+import { STATUS_FILTER_OPTIONS, type StatusFilterOption } from "../constants";
 
-defineEmits<{
-  "update:modelValue": [value: string];
-}>();
-
-const options = ["All", "Pending", "Approved", "Rejected"];
+defineProps<{ modelValue: StatusFilterOption | string }>();
+defineEmits<{ "update:modelValue": [value: string] }>();
 </script>

@@ -20,29 +20,29 @@
           <div class="sp-roles">
             <button
               type="button"
-              :class="['sp-role-tile', form.role === 'Requester' && 'sp-role-tile--active']"
-              @click="form.role = 'Requester'"
+              :class="['sp-role-tile', form.role === UserRole.REQUESTER && 'sp-role-tile--active']"
+              @click="form.role = UserRole.REQUESTER"
             >
               <span class="sp-role-icon sp-role-icon--blue"><User :size="18" stroke-width="1.75" /></span>
               <span class="sp-role-text">
                 <strong>Requester</strong>
                 <span>Submit vacation requests</span>
               </span>
-              <span class="sp-role-check" v-if="form.role === 'Requester'">
+              <span class="sp-role-check" v-if="form.role === UserRole.REQUESTER">
                 <CheckCircle :size="16" stroke-width="2.5" />
               </span>
             </button>
             <button
               type="button"
-              :class="['sp-role-tile', form.role === 'Validator' && 'sp-role-tile--active sp-role-tile--active-green']"
-              @click="form.role = 'Validator'"
+              :class="['sp-role-tile', form.role === UserRole.VALIDATOR && 'sp-role-tile--active sp-role-tile--active-green']"
+              @click="form.role = UserRole.VALIDATOR"
             >
               <span class="sp-role-icon sp-role-icon--green"><ShieldCheck :size="18" stroke-width="1.75" /></span>
               <span class="sp-role-text">
                 <strong>Validator</strong>
                 <span>Review &amp; approve requests</span>
               </span>
-              <span class="sp-role-check sp-role-check--green" v-if="form.role === 'Validator'">
+              <span class="sp-role-check sp-role-check--green" v-if="form.role === UserRole.VALIDATOR">
                 <CheckCircle :size="16" stroke-width="2.5" />
               </span>
             </button>
@@ -80,7 +80,7 @@
 
       <div class="sp-footer">
         Already have an account?
-        <RouterLink to="/login" class="sp-link">Sign in</RouterLink>
+        <RouterLink :to="ROUTES.LOGIN" class="sp-link">Sign in</RouterLink>
       </div>
     </div>
   </div>
@@ -90,13 +90,15 @@
 import { reactive, ref } from "vue";
 import { useRouter } from "vue-router";
 import { CalendarRange, AlertCircle, ArrowRight, User, ShieldCheck, CheckCircle } from "lucide-vue-next";
-import { authService } from "../services/auth";
-import { useAuth } from "../composables/useAuth";
+import { authService }            from "../services/auth";
+import { useAuth }                from "../composables/useAuth";
+import { ROUTES, UserRole, roleToRoute } from "../constants";
+import { getApiError }            from "../utils/error";
 
 const router = useRouter();
 const { setUser } = useAuth();
 
-const form = reactive({ name: "", role: "" as "Requester" | "Validator" | "", password: "", confirm: "" });
+const form = reactive({ name: "", role: "" as UserRole | "", password: "", confirm: "" });
 const errors = reactive({ name: "", role: "", password: "", confirm: "" });
 const error   = ref("");
 const loading = ref(false);
@@ -115,11 +117,11 @@ async function submit() {
   loading.value = true;
   error.value   = "";
   try {
-    const { data } = await authService.register({ name: form.name.trim(), role: form.role as "Requester" | "Validator", password: form.password });
+    const { data } = await authService.register({ name: form.name.trim(), role: form.role as UserRole, password: form.password });
     setUser(data);
-    router.push(data.role === "Requester" ? "/requester" : "/validator");
-  } catch (err: any) {
-    error.value = err?.response?.data?.error || "Registration failed. Please try again.";
+    router.push(roleToRoute(data.role));
+  } catch (err: unknown) {
+    error.value = getApiError(err, "Registration failed. Please try again.");
   } finally {
     loading.value = false;
   }

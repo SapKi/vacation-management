@@ -245,7 +245,8 @@ body {
 
 .badge-pending  { background: var(--warning-bg);  color: var(--warning); border: 1px solid var(--warning-border); }
 .badge-approved { background: var(--success-bg);  color: var(--success); border: 1px solid var(--success-border); }
-.badge-rejected { background: var(--danger-bg);   color: var(--danger);  border: 1px solid var(--danger-border); }
+.badge-rejected   { background: var(--danger-bg);  color: var(--danger);  border: 1px solid var(--danger-border); }
+.badge-cancelled  { background: #f1f5f9; color: #64748b; border: 1px solid #cbd5e1; }
 
 /* ── Form ──────────────────────────────────────────── */
 .form-group { margin-bottom: 1.1rem; }
@@ -352,6 +353,52 @@ body {
   box-shadow: 0 4px 10px rgba(220,38,38,0.35);
   transform: translateY(-1px);
 }
+
+.btn-cancel {
+  background: transparent;
+  color: var(--danger);
+  border: 1.5px solid var(--danger-border);
+}
+.btn-cancel:hover:not(:disabled) {
+  background: var(--danger-bg);
+  border-color: var(--danger);
+}
+
+/* ── Cancel modal content ───────────────────────────── */
+.cancel-warning {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  background: var(--warning-bg);
+  border: 1px solid var(--warning-border);
+  border-radius: var(--radius);
+  padding: 0.875rem 1rem;
+  margin-bottom: 1rem;
+  font-size: 0.82rem;
+  color: #92400e;
+  line-height: 1.55;
+}
+.cancel-warning-icon { flex-shrink: 0; margin-top: 1px; color: var(--warning); }
+
+.cancel-summary {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.75rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.cancel-summary-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+.cancel-summary-row svg { flex-shrink: 0; color: var(--text-muted); }
+.cancel-summary-days   { color: var(--text-muted); margin-left: 0.25rem; }
+.cancel-summary-reason { font-style: italic; }
 
 .btn-ghost {
   background: transparent;

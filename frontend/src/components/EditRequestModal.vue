@@ -10,6 +10,9 @@
       </div>
 
       <div class="modal-body">
+        <div v-if="error" class="alert alert-error" style="margin-bottom:1rem">
+          <AlertCircle :size="15" stroke-width="2" /> {{ error }}
+        </div>
         <div class="form-group">
           <label class="form-label" for="edit-start">
             Start Date <span class="required-mark">*</span>
@@ -67,12 +70,13 @@
 
 <script setup lang="ts">
 import { reactive, watch } from "vue";
-import { X } from "lucide-vue-next";
+import { X, AlertCircle } from "lucide-vue-next";
 import type { VacationRequest } from "../services/vacationRequestsApi";
 
 const props = defineProps<{
   request: VacationRequest;
   loading?: boolean;
+  error?: string;
 }>();
 
 const emit = defineEmits<{

@@ -27,10 +27,12 @@
         :show-actions="showActions"
         :show-employee="showEmployee"
         :show-edit="showEdit"
+        :show-cancel="showCancel"
         :action-loading="actionLoadingId === request.id"
         @approve="$emit('approve', $event)"
         @reject="$emit('reject', $event)"
         @edit="$emit('edit', $event)"
+        @cancel="$emit('cancel', $event)"
       />
     </template>
   </div>
@@ -49,6 +51,7 @@ defineProps<{
   showActions?: boolean;
   showEmployee?: boolean;
   showEdit?: boolean;
+  showCancel?: boolean;
   actionLoadingId?: number | null;
 }>();
 
@@ -56,5 +59,6 @@ defineEmits<{
   approve: [id: number];
   reject: [id: number];
   edit: [id: number];
+  cancel: [id: number];
 }>();
 </script>

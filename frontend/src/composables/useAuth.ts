@@ -1,13 +1,13 @@
 import { ref, computed } from "vue";
 import { authService, type AuthUser } from "../services/auth";
+import { UserRole } from "../constants";
 
-// Module-level ref — shared singleton across all components
 const currentUser = ref<AuthUser | null>(authService.get());
 
 export function useAuth() {
   const isLoggedIn  = computed(() => !!currentUser.value);
-  const isRequester = computed(() => currentUser.value?.role === "Requester");
-  const isValidator = computed(() => currentUser.value?.role === "Validator");
+  const isRequester = computed(() => currentUser.value?.role === UserRole.REQUESTER);
+  const isValidator = computed(() => currentUser.value?.role === UserRole.VALIDATOR);
 
   function setUser(user: AuthUser) {
     authService.save(user);

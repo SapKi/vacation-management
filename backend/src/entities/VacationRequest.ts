@@ -9,9 +9,10 @@ import {
 import { User } from "./User";
 
 export enum RequestStatus {
-  PENDING = "Pending",
-  APPROVED = "Approved",
-  REJECTED = "Rejected",
+  PENDING   = "Pending",
+  APPROVED  = "Approved",
+  REJECTED  = "Rejected",
+  CANCELLED = "Cancelled",
 }
 
 @Entity("vacation_requests")

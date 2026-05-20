@@ -72,6 +72,20 @@ export const approveRequest = async (
   }
 };
 
+export const cancelRequest = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const result = await service.cancelRequest(id);
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const rejectRequest = async (
   req: Request,
   res: Response,
