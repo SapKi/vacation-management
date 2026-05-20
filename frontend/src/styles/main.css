@@ -21,18 +21,18 @@
   --text-secondary: #94a3b8;
   --text-muted:     #475569;
 
-  --border:         rgba(99,102,241,0.15);
-  --border-strong:  rgba(99,102,241,0.3);
+  --border:         rgba(99,102,241,0.22);
+  --border-strong:  rgba(99,102,241,0.4);
 
   --bg:             #060b18;
-  --surface:        #0d1526;
-  --surface-raised: #111e38;
+  --surface:        #101828;
+  --surface-raised: #1a2540;
 
-  --shadow-xs: 0 1px 2px rgba(0,0,0,0.4);
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.5), 0 0 0 1px rgba(99,102,241,0.08);
-  --shadow-md: 0 4px 16px rgba(0,0,0,0.6), 0 0 0 1px rgba(99,102,241,0.12);
-  --shadow-lg: 0 16px 40px rgba(0,0,0,0.7), 0 0 0 1px rgba(99,102,241,0.15);
-  --shadow-xl: 0 24px 60px rgba(0,0,0,0.8), 0 0 0 1px rgba(99,102,241,0.2);
+  --shadow-xs: 0 1px 2px rgba(0,0,0,0.5);
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.5), 0 0 0 1px rgba(99,102,241,0.12);
+  --shadow-md: 0 6px 20px rgba(0,0,0,0.6), 0 0 0 1px rgba(99,102,241,0.18);
+  --shadow-lg: 0 16px 40px rgba(0,0,0,0.7), 0 0 0 1px rgba(99,102,241,0.2);
+  --shadow-xl: 0 24px 60px rgba(0,0,0,0.8), 0 0 0 1px rgba(99,102,241,0.25);
 
   --radius-sm:  6px;
   --radius:     10px;
@@ -179,8 +179,8 @@ body {
 }
 
 .card-title {
-  font-size: 0.875rem; font-weight: 700;
-  color: var(--text); letter-spacing: 0.1px;
+  font-size: 0.95rem; font-weight: 700;
+  color: #f1f5f9; letter-spacing: 0.1px;
   margin-bottom: 1.25rem;
   padding-bottom: 0.875rem;
   border-bottom: 1px solid var(--border);
@@ -207,7 +207,7 @@ body {
 .form-label {
   display: block;
   font-size: 0.78rem; font-weight: 600;
-  color: var(--text-secondary);
+  color: #c4cfdf;
   margin-bottom: 0.4rem; letter-spacing: 0.1px;
 }
 
@@ -217,18 +217,19 @@ body {
 .form-textarea {
   width: 100%;
   padding: 0.6rem 0.875rem;
-  border: 1.5px solid rgba(255,255,255,0.1);
+  border: 1.5px solid rgba(99,102,241,0.4);
   border-radius: var(--radius);
   font-size: 0.875rem;
-  color: var(--text);
-  background: rgba(255,255,255,0.04);
+  color: #e2e8f0;
+  background: #1a2540;
   transition: border-color 0.15s, box-shadow 0.15s;
   outline: none;
   font-family: inherit;
   line-height: 1.5;
+  color-scheme: dark;
 }
 .form-input::placeholder,
-.form-textarea::placeholder { color: #334155; }
+.form-textarea::placeholder { color: #64748b; }
 
 .form-input:focus,
 .form-textarea:focus {
@@ -291,14 +292,14 @@ body {
 }
 
 .btn-ghost {
-  background: rgba(255,255,255,0.04);
-  color: var(--text-secondary);
-  border: 1.5px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.05);
+  color: #a0aec0;
+  border: 1.5px solid rgba(255,255,255,0.18);
 }
 .btn-ghost:hover:not(:disabled) {
-  background: rgba(99,102,241,0.1);
-  border-color: rgba(99,102,241,0.35);
-  color: var(--text);
+  background: rgba(99,102,241,0.12);
+  border-color: rgba(99,102,241,0.45);
+  color: #e2e8f0;
 }
 
 .btn-cancel {
