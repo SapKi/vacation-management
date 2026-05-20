@@ -68,21 +68,25 @@ Sessions are stored in `localStorage`. There is no JWT — the user object is pe
 ## Architecture
 
 ```
-┌─────────────────────────────────────┐
-│           Browser (Vue 3 SPA)        │
-│  Pages → Composables → Services     │
-│          ↓  Axios HTTP               │
-├─────────────────────────────────────┤
-│         Express REST API             │
-│  Routes → Controllers → Services    │
-│          ↓  TypeORM                  │
-├─────────────────────────────────────┤
-│           PostgreSQL                 │
-│   users   |   vacation_requests      │
-└─────────────────────────────────────┘
+┌─────────────────────────────────────────────────────┐
+│                 Browser (Vue 3 SPA)                  │
+│   Pages → Composables → Services → IStorage         │
+│                  ↓  Axios HTTP                       │
+├─────────────────────────────────────────────────────┤
+│               Express REST API                       │
+│  Routes(factory) → Controllers(factory)              │
+│       → Services(injected repos)                     │
+│       → IRepository<T> ← TypeOrmBaseRepository<T>   │
+│                  ↓  TypeORM                          │
+├─────────────────────────────────────────────────────┤
+│                  PostgreSQL                          │
+│        users   |   vacation_requests                 │
+└─────────────────────────────────────────────────────┘
 ```
 
 The backend exposes a REST API on port **3000**. The frontend dev server runs on port **5173** and calls the API directly via Axios (`baseURL = http://localhost:3000/api`).
+
+All layers are wired through dependency injection — no layer imports concrete implementations directly. Swapping PostgreSQL for another DB requires only new `IRepository` implementations registered in `container.ts`.
 
 ---
 
@@ -93,31 +97,49 @@ vacation-management/
 ├── backend/
 │   ├── src/
 │   │   ├── controllers/
-│   │   │   ├── auth.controller.ts            # login, register handlers
-│   │   │   └── vacationRequest.controller.ts # vacation request handlers
+│   │   │   ├── auth.controller.ts            # factory: createAuthController(service)
+│   │   │   └── vacationRequest.controller.ts # factory: createVacationRequestController(service)
 │   │   ├── services/
-│   │   │   ├── auth.service.ts               # login/register business logic
-│   │   │   └── vacationRequest.service.ts    # CRUD + approve/reject logic
+│   │   │   ├── auth.service.ts               # login/register — receives IUserRepository
+│   │   │   └── vacationRequest.service.ts    # CRUD/approve/reject — receives IRepository deps
+│   │   ├── repositories/
+│   │   │   ├── IRepository.ts                # generic base: findById, save, remove, create
+│   │   │   ├── IUserRepository.ts            # extends IRepository<User> + domain methods
+│   │   │   ├── IVacationRequestRepository.ts # extends IRepository<VacationRequest>
+│   │   │   └── typeorm/
+│   │   │       ├── TypeOrmBaseRepository.ts  # abstract TypeORM impl of IRepository<T>
+│   │   │       ├── TypeOrmUserRepository.ts  # extends base, adds user-specific queries
+│   │   │       └── TypeOrmVacationRequestRepository.ts
+│   │   ├── validators/
+│   │   │   ├── auth.validator.ts             # pure validation functions for auth
+│   │   │   └── vacationRequest.validator.ts  # pure validation functions for requests
 │   │   ├── entities/
 │   │   │   ├── User.ts                       # TypeORM entity + UserRole enum
 │   │   │   └── VacationRequest.ts            # TypeORM entity + RequestStatus enum
 │   │   ├── routes/
-│   │   │   ├── auth.routes.ts                # POST /login, /register
-│   │   │   ├── vacationRequest.routes.ts     # vacation request endpoints
-│   │   │   └── user.routes.ts                # GET /users, /users/:id
+│   │   │   ├── auth.routes.ts                # factory: createAuthRouter(service)
+│   │   │   ├── vacationRequest.routes.ts     # factory: createVacationRequestRouter(service)
+│   │   │   └── user.routes.ts                # factory: createUserRouter(userRepo)
 │   │   ├── middleware/
 │   │   │   └── errorHandler.ts               # centralised Express error handler
+│   │   ├── utils/
+│   │   │   └── asyncHandler.ts               # generic async Express wrapper (removes try/catch)
 │   │   ├── tests/
-│   │   │   ├── auth.service.test.ts          # unit tests (mocked DB)
-│   │   │   ├── auth.routes.test.ts           # integration tests (real DB)
-│   │   │   ├── vacationRequest.service.test.ts
-│   │   │   ├── vacationRequest.routes.test.ts
-│   │   │   └── vacationRequest.test.ts       # original integration tests
+│   │   │   ├── auth.service.test.ts          # unit — mocked IUserRepository
+│   │   │   ├── auth.routes.test.ts           # integration — real DB + health endpoint
+│   │   │   ├── vacationRequest.service.test.ts # unit — mocked IRepository
+│   │   │   ├── vacationRequest.routes.test.ts  # integration — real DB
+│   │   │   ├── vacationRequest.test.ts         # integration — original suite
+│   │   │   ├── user.routes.test.ts             # integration — GET /users endpoints
+│   │   │   ├── validators.test.ts              # unit — all validator functions
+│   │   │   └── errorHandler.test.ts            # unit — middleware fallback branches
 │   │   ├── seed/
 │   │   │   └── seed.ts                       # wipes and re-seeds demo data
-│   │   ├── app.ts                            # Express app + route mounting
-│   │   ├── data-source.ts                    # TypeORM DataSource config
+│   │   ├── container.ts                      # DI wiring: creates and injects all deps
+│   │   ├── app.ts                            # Express app — uses container + route factories
+│   │   ├── data-source.ts                    # TypeORM DataSource — fully env-driven
 │   │   └── server.ts                         # HTTP server entry point
+│   ├── .env.example
 │   ├── jest.config.js
 │   ├── tsconfig.json
 │   └── package.json
@@ -144,8 +166,11 @@ vacation-management/
     │   │   └── useAuth.ts            # reactive auth state (module-level ref)
     │   ├── services/
     │   │   ├── api.ts                # Axios instance (baseURL from env)
-    │   │   ├── auth.ts               # login/register + localStorage helpers
-    │   │   └── vacationRequestsApi.ts
+    │   │   ├── auth.ts               # createAuthService(IStorage) factory + singleton
+    │   │   └── vacationRequestsApi.ts # all vacation request API calls
+    │   ├── storage/
+    │   │   ├── IStorage.ts           # generic interface: get, set, remove, has
+    │   │   └── LocalStorage.ts       # default IStorage impl using localStorage
     │   ├── utils/
     │   │   ├── date.ts               # formatDate, formatRelative, daysBetween
     │   │   └── error.ts              # getApiError (extracts Axios error message)
@@ -155,6 +180,7 @@ vacation-management/
     │   │   └── index.ts              # Vue Router with navigation guards
     │   └── styles/
     │       └── main.css              # global design tokens + component styles
+    ├── .env.example
     ├── vite.config.ts
     ├── tsconfig.json
     └── package.json
@@ -552,18 +578,20 @@ cd backend
 npm test
 ```
 
-**5 suites — 63 tests — all passing**
+**8 suites — 103 tests — 100% statement/function/line coverage**
 
 | Suite | Type | What it covers |
 |---|---|---|
-| `auth.service.test.ts` | Unit (mocked DB) | `AuthService.login` + `.register` — all validation branches |
-| `vacationRequest.service.test.ts` | Unit (mocked DB) | All 6 service methods with every error guard |
-| `auth.routes.test.ts` | Integration (real DB) | POST /auth/register + /auth/login — all status codes |
-| `vacationRequest.routes.test.ts` | Integration (real DB) | GET all, PATCH update, PATCH reject, DELETE — all guards |
+| `auth.service.test.ts` | Unit (mocked `IUserRepository`) | `AuthService.login` + `.register` — all validation branches |
+| `vacationRequest.service.test.ts` | Unit (mocked `IRepository`) | All 7 service methods including `??` fallback branches |
+| `auth.routes.test.ts` | Integration (real DB) | POST /auth/register + /auth/login + GET /health |
+| `vacationRequest.routes.test.ts` | Integration (real DB) | GET all, PATCH update/reject, DELETE — all status codes |
 | `vacationRequest.test.ts` | Integration (real DB) | POST create, PATCH approve/reject, GET by user |
+| `user.routes.test.ts` | Integration (real DB) | GET /users + GET /users/:id + 404 case |
+| `validators.test.ts` | Unit | Every validator function — all branches including boundary values |
+| `errorHandler.test.ts` | Unit | Middleware — status/message present, missing, and both absent |
 
-Unit tests mock `AppDataSource.getRepository` with Jest — no database connection required.
-Integration tests require a running PostgreSQL instance and clean up all test rows after each suite.
+Unit tests inject mock `IRepository` / `IUserRepository` objects directly into service constructors — no database or module mocking needed.
 
 ### Frontend (Vitest)
 
@@ -572,15 +600,19 @@ cd frontend
 npm test
 ```
 
-**5 suites — 47 tests — all passing**
+**7 suites — 65 tests — 100% statement/function/line coverage**
 
 | Suite | What it covers |
 |---|---|
-| `utils/date.test.ts` | `formatDate`, `formatRelative` (vi.useFakeTimers), `daysBetween`, `MS_PER_DAY` |
+| `utils/date.test.ts` | `formatDate`, `formatRelative` (fake timers), `daysBetween`, `MS_PER_DAY` |
 | `utils/error.test.ts` | `getApiError` — Axios shape, plain Error, null, string, custom fallback |
-| `services/auth.test.ts` | `authService` localStorage operations (save, get, clear, isLoggedIn) |
-| `composables/useAuth.test.ts` | `setUser`, `logout`, `isRequester`, `isValidator`, initial state from localStorage |
-| `constants/index.test.ts` | Enum values, ROUTES constants, `roleToRoute`, `STATUS_FILTER_OPTIONS` |
+| `services/auth.test.ts` | `createAuthService` with injected mock storage + HTTP `login`/`register` with mocked Axios |
+| `services/vacationRequestsApi.test.ts` | All 7 API methods with mocked Axios — URL, method, and payload assertions |
+| `storage/LocalStorage.test.ts` | `get`, `set`, `remove`, `has` — including overwrite and nested object serialisation |
+| `composables/useAuth.test.ts` | `setUser`, `logout`, `isRequester`, `isValidator`, initial state |
+| `constants/index.test.ts` | Enum values, ROUTES, `roleToRoute`, `STATUS_FILTER_OPTIONS` |
+
+The only uncovered branch is `api.ts` line 4: the `import.meta.env.VITE_API_BASE_URL` fallback — this requires a Vite build environment and is not meaningfully testable in unit tests.
 
 ---
 
@@ -588,17 +620,25 @@ npm test
 
 **Cancel = hard delete.** Cancelled requests are permanently removed from the database. There is no "Cancelled" status and no restore flow. This keeps the state machine simple — only three statuses exist.
 
-**`synchronize: true` in TypeORM.** The database schema auto-updates on every server start. Must be replaced with TypeORM migrations before any production deployment.
+**`DB_SYNC` env-controlled.** `synchronize` is driven by `DB_SYNC=true` in `.env`. Set to `false` in staging/production and use TypeORM migrations instead.
 
-**No JWT.** The user object is stored directly in `localStorage` after login. Acceptable for a demo; in production, use a signed JWT or a server-side session with a secure `httpOnly` cookie.
+**No JWT.** The user object is stored directly via `IStorage` after login. Acceptable for a demo; in production, use a signed JWT or a server-side session with a secure `httpOnly` cookie.
 
 **Single source of truth for routes and role strings.** All route paths live in the `ROUTES` constant in `constants/index.ts`. All role strings live in the `UserRole` enum. No string literals are scattered through components.
 
-**`password_hash` is `select: false`.** TypeORM never includes the column in standard repository queries. `AuthService.login` uses a QueryBuilder with `.addSelect("u.password_hash")` to fetch it only for the bcrypt comparison.
+**`password_hash` is `select: false`.** TypeORM never includes the column in standard repository queries. `TypeOrmUserRepository.findByNameWithPassword` uses a QueryBuilder with `.addSelect("u.password_hash")` only when needed for bcrypt comparison.
 
-**Role-aware navigation.** The header shows only the link relevant to the current user's role, plus a "Switch to [other role]" button that logs the current user out and redirects to `/login`. Neither role can navigate to the other's dashboard through the UI.
+**Repository pattern with generic base.** `IRepository<T>` defines the minimal contract (findById, save, remove, create). Domain interfaces extend it with query-specific methods. `TypeOrmBaseRepository<T>` provides one TypeORM implementation of the base. Swapping databases requires only new classes implementing the domain interfaces — services and controllers are untouched.
 
-**Background decoration is a fixed layer at `z-index: 0`.** All page content sits at `z-index: 1` (via `.main-content`) so the icons are always behind interactive elements without needing per-component z-index management.
+**Dependency injection via `container.ts`.** All wiring happens in one file. No service, controller, or route imports a concrete implementation directly.
+
+**Generic `asyncHandler`.** Eliminates the try/catch boilerplate from every controller method. Any thrown `{ status, message }` object flows to the centralised `errorHandler` middleware.
+
+**Injected storage on the frontend.** `createAuthService(storage: IStorage)` accepts any storage implementation. The production singleton uses `LocalStorageAdapter`; tests inject a plain mock object — no `localStorage` stubbing needed.
+
+**Role-aware navigation.** The header shows only the link relevant to the current user's role, plus a "Switch to [other role]" button that logs out and redirects to `/login`.
+
+**Background decoration is a fixed layer at `z-index: 0`.** All page content sits at `z-index: 1` (via `.main-content`) so the icons are always behind interactive elements.
 
 ---
 

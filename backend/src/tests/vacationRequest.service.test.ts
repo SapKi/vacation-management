@@ -107,6 +107,16 @@ describe("VacationRequestService.updateRequest", () => {
     expect(result.start_date).toBe("2026-10-01");
   });
 
+  it("falls back to existing dates when dto fields are omitted", async () => {
+    const req = { ...pending };
+    mockRequestRepo.findById.mockResolvedValue(req);
+    mockRequestRepo.save.mockResolvedValue(req);
+    await service.updateRequest(10, { reason: "Updated reason" });
+    expect(mockRequestRepo.save).toHaveBeenCalledWith(
+      expect.objectContaining({ start_date: pending.start_date, end_date: pending.end_date })
+    );
+  });
+
   it("throws 404 when not found", async () => {
     mockRequestRepo.findById.mockResolvedValue(null);
     await expect(service.updateRequest(99, { startDate: "2026-10-01", endDate: "2026-10-05" }))

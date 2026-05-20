@@ -1,7 +1,11 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, vi } from "vitest";
 import { IStorage } from "../storage/IStorage";
 import { createAuthService } from "./auth";
 import { UserRole } from "../constants";
+
+vi.mock("./api", () => ({
+  default: { post: vi.fn() },
+}));
 
 const fakeUser = { id: 1, name: "Alice", role: UserRole.REQUESTER };
 
@@ -58,5 +62,24 @@ describe("authService (injected storage)", () => {
     service.save(fakeUser);
     service.clear();
     expect(service.isLoggedIn()).toBe(false);
+  });
+});
+
+describe("authService HTTP methods", () => {
+  it("login calls POST /auth/login with name and password", async () => {
+    const { default: api } = await import("./api");
+    (api.post as ReturnType<typeof vi.fn>).mockResolvedValue({ data: fakeUser });
+    const service = createAuthService();
+    await service.login("Alice", "pass");
+    expect(api.post).toHaveBeenCalledWith("/auth/login", { name: "Alice", password: "pass" });
+  });
+
+  it("register calls POST /auth/register with payload", async () => {
+    const { default: api } = await import("./api");
+    (api.post as ReturnType<typeof vi.fn>).mockResolvedValue({ data: fakeUser });
+    const service = createAuthService();
+    const payload = { name: "Alice", role: UserRole.REQUESTER, password: "pass1234" };
+    await service.register(payload);
+    expect(api.post).toHaveBeenCalledWith("/auth/register", payload);
   });
 });
