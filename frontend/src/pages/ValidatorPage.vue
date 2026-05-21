@@ -32,6 +32,7 @@
         empty-message="No requests match the current filter."
         @approve="handleApprove"
         @reject="openRejectModal"
+        @view="openViewModal"
       />
     </div>
 
@@ -40,6 +41,12 @@
       :loading="actionLoadingId === rejectTargetId"
       @confirm="handleReject"
       @cancel="rejectTargetId = null"
+    />
+
+    <ViewDetailsModal
+      v-if="viewTarget !== null"
+      :request="viewTarget"
+      @close="viewTarget = null"
     />
   </div>
 </template>
@@ -50,6 +57,7 @@ import { RefreshCw, AlertCircle, CheckCircle } from "lucide-vue-next";
 import VacationRequestList from "../components/VacationRequestList.vue";
 import StatusFilter        from "../components/StatusFilter.vue";
 import RejectModal         from "../components/RejectModal.vue";
+import ViewDetailsModal    from "../components/ViewDetailsModal.vue";
 import { vacationRequestsApi } from "../services/vacationRequestsApi";
 import type { VacationRequest } from "../services/vacationRequestsApi";
 import { useAuth }      from "../composables/useAuth";
@@ -68,6 +76,11 @@ const actionLoadingId = ref<number | null>(null);
 const actionError     = ref("");
 const actionSuccess   = ref("");
 const rejectTargetId  = ref<number | null>(null);
+const viewTarget      = ref<VacationRequest | null>(null);
+
+function openViewModal(id: number) {
+  viewTarget.value = requests.value.find(r => r.id === id) ?? null;
+}
 
 async function loadRequests() {
   loading.value = true;

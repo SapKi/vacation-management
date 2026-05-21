@@ -21,6 +21,7 @@
             empty-message="You haven't submitted any vacation requests yet."
             @edit="openEditModal"
             @cancel="openCancelModal"
+            @view="openViewModal"
           />
         </div>
       </div>
@@ -42,6 +43,12 @@
       @confirm="handleCancel"
       @cancel="cancelTarget = null"
     />
+
+    <ViewDetailsModal
+      v-if="viewTarget !== null"
+      :request="viewTarget"
+      @close="viewTarget = null"
+    />
   </div>
 </template>
 
@@ -51,6 +58,7 @@ import VacationRequestForm from "../components/VacationRequestForm.vue";
 import VacationRequestList from "../components/VacationRequestList.vue";
 import EditRequestModal    from "../components/EditRequestModal.vue";
 import CancelModal         from "../components/CancelModal.vue";
+import ViewDetailsModal    from "../components/ViewDetailsModal.vue";
 import { vacationRequestsApi } from "../services/vacationRequestsApi";
 import type { VacationRequest } from "../services/vacationRequestsApi";
 import { useAuth } from "../composables/useAuth";
@@ -67,6 +75,11 @@ const editLoading   = ref(false);
 const editError     = ref("");
 const cancelTarget  = ref<VacationRequest | null>(null);
 const cancelLoading = ref(false);
+const viewTarget    = ref<VacationRequest | null>(null);
+
+function openViewModal(id: number) {
+  viewTarget.value = requests.value.find(r => r.id === id) ?? null;
+}
 
 async function loadRequests() {
   loading.value = true;

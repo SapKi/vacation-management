@@ -33,6 +33,7 @@
         @reject="$emit('reject', $event)"
         @edit="$emit('edit', $event)"
         @cancel="$emit('cancel', $event)"
+        @view="$emit('view', $event)"
       />
     </template>
   </div>
@@ -57,8 +58,9 @@ defineProps<{
 
 defineEmits<{
   approve: [id: number];
-  reject: [id: number];
-  edit: [id: number];
-  cancel: [id: number];
+  reject:  [id: number];
+  edit:    [id: number];
+  cancel:  [id: number];
+  view:    [id: number];
 }>();
 </script>

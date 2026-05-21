@@ -25,17 +25,19 @@
       <span><strong>Manager note:</strong> {{ request.comments }}</span>
     </div>
 
-    <div
-      v-if="request.status === RequestStatus.PENDING && (showActions || showEdit || showCancel)"
-      class="request-actions"
-    >
-      <button v-if="showEdit" class="btn btn-ghost btn-sm" @click="$emit('edit', request.id)">
-        <Pencil :size="13" stroke-width="2.5" /> Edit
+    <div class="request-actions">
+      <button class="btn btn-ghost btn-sm" @click="$emit('view', request.id)">
+        <Eye :size="13" stroke-width="2.5" /> View Details
       </button>
-      <button v-if="showCancel" class="btn btn-ghost btn-sm" @click="$emit('cancel', request.id)">
-        <Ban :size="13" stroke-width="2.5" /> Cancel
-      </button>
-      <template v-if="showActions">
+      <template v-if="request.status === RequestStatus.PENDING && (showEdit || showCancel)">
+        <button v-if="showEdit" class="btn btn-ghost btn-sm" @click="$emit('edit', request.id)">
+          <Pencil :size="13" stroke-width="2.5" /> Edit
+        </button>
+        <button v-if="showCancel" class="btn btn-ghost btn-sm" @click="$emit('cancel', request.id)">
+          <Ban :size="13" stroke-width="2.5" /> Cancel
+        </button>
+      </template>
+      <template v-if="request.status === RequestStatus.PENDING && showActions">
         <button class="btn btn-success btn-sm" :disabled="actionLoading" @click="$emit('approve', request.id)">
           <Check :size="13" stroke-width="3" /> Approve
         </button>
@@ -49,7 +51,7 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import { User, Check, X, MessageSquare, Pencil, Ban } from "lucide-vue-next";
+import { User, Check, X, MessageSquare, Pencil, Ban, Eye } from "lucide-vue-next";
 import StatusBadge from "./StatusBadge.vue";
 import type { VacationRequest } from "../services/vacationRequestsApi";
 import { RequestStatus } from "../constants";
@@ -69,6 +71,7 @@ defineEmits<{
   reject:  [id: number];
   edit:    [id: number];
   cancel:  [id: number];
+  view:    [id: number];
 }>();
 
 const dayCount = computed(() => daysBetween(props.request.start_date, props.request.end_date));
